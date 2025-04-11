@@ -98,4 +98,4 @@ EventEase is a web-based event planning platform designed to simplify and stream
 - Share deployment links and documentation with the mentor.
 
 
-
+Deployed Link = https://s64-saanvi-capstone-eventease-8.onrender.com
