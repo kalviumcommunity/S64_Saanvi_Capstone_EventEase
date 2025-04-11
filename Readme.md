@@ -86,16 +86,14 @@ EventEase is a web-based event planning platform designed to simplify and stream
 **Day 28:**
 - Perform security checks and optimize performance.
 ### Week 5 - Final Touches & Submission
-
 **Day 29:**
 - Prepare documentation and proof of work:
   - PR links, feature demo videos, and detailed reports.
   - Record walkthrough video showcasing key functionalities.
-
 **Day 30:**
 - Conduct final testing and debugging.
 - Submit the project for evaluation.
 - Share deployment links and documentation with the mentor.
 
-
-Deployed Link = https://s64-saanvi-capstone-eventease-8.onrender.com
+backend Deployed Link = https://s64-saanvi-capstone-eventease-8.onrender.com
+Frontend deployed link = https://capstone-eventease.netlify.app/
