@@ -1,6 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const eventRoutes = require("./routes/eventRoutes");
+
 
 // Load env variables
 dotenv.config();
@@ -15,6 +19,8 @@ mongoose.connect(process.env.MONGO_URI, {
 })
 .then(() => {
   console.log("✅ MongoDB connected successfully");
+
+  app.use('/api/events', eventRoutes);
 
   // Start server
   app.listen(PORT, () => {
