@@ -1,5 +1,3 @@
-// models/Event.js
-
 const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema({
@@ -36,4 +34,5 @@ const eventSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Event', eventSchema);
+// ✅ Avoid OverwriteModelError
+module.exports = mongoose.models.Event || mongoose.model('Event', eventSchema);
