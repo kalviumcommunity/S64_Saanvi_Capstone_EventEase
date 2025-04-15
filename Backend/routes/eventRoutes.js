@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Event = require("../models/event");
-const { createEvent } = require('../controllers/eventController');
+const { createEvent, updateEvent } = require('../controllers/eventController');
+
 
 // GET /api/events (Fetch all events)
 router.get('/', async (req, res) => {
@@ -15,5 +16,6 @@ router.get('/', async (req, res) => {
 
 // POST /api/events (Create a new event)
 router.post('/', createEvent);
+router.put('/:id', updateEvent); 
 
 module.exports = router;
