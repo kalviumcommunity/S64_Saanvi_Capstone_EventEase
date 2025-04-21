@@ -1,65 +1,66 @@
 import React from 'react';
-import Navbar from './components/NavBar';
+import Navbar from '../components/NavBar';
 
 const LandingPage = () => {
   const styles = {
     container: {
       fontFamily: 'Arial, sans-serif',
-      backgroundColor: '#ffffff',
+      background: 'linear-gradient(to bottom right, #FFF8F0, #F5FADC)',
       color: '#000',
       margin: 0,
       padding: 0,
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh',  // Full height of the screen
-      height: '100%',  // Ensures the body and html take the full screen
+      width: '100%',
     },
     hero: {
       display: 'flex',
-      flexDirection: 'row',  // Layout for the hero section (side-by-side)
+      flexWrap: 'wrap',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '60px 40px',
-      backgroundColor: '#F5FADC',
-      height: '100vh', // Full viewport height for the hero section
-      boxSizing: 'border-box', // To prevent overflow issues
+      padding: '80px 60px',
+      minHeight: '100vh',
+      backgroundColor: 'transparent',
     },
     heroText: {
       maxWidth: '600px',
       flex: 1,
+      animation: 'fadeIn 1s ease-in-out',
     },
     pinkButton: {
-      marginTop: '24px',
+      marginTop: '30px',
       backgroundColor: '#FF3DAB',
       color: '#fff',
       border: 'none',
-      padding: '14px 28px',
-      borderRadius: '10px',
+      padding: '16px 32px',
+      borderRadius: '12px',
       cursor: 'pointer',
       fontWeight: 'bold',
+      fontSize: '18px',
+      transition: 'transform 0.3s ease',
     },
     heroImage: {
-      maxWidth: '300px',
-      borderRadius: '12px',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-      marginTop: '20px',
+      maxWidth: '380px',
+      borderRadius: '14px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+      marginTop: '30px',
+      animation: 'slideIn 1s ease-in-out',
     },
     section: {
-      padding: '60px 40px',
+      padding: '80px 60px',
     },
     featureSection: {
       backgroundColor: '#E6FFC8',
     },
     featureGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-      gap: '24px',
-      marginTop: '30px',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+      gap: '32px',
+      marginTop: '40px',
     },
     featureCard: {
-      padding: '20px',
-      borderRadius: '12px',
+      padding: '24px',
+      borderRadius: '14px',
       boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+      transition: 'transform 0.3s ease',
     },
     howItWorks: {
       textAlign: 'center',
@@ -67,13 +68,13 @@ const LandingPage = () => {
     },
     stepsGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-      gap: '24px',
-      marginTop: '30px',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+      gap: '30px',
+      marginTop: '40px',
     },
     stepCard: {
-      padding: '20px',
-      borderRadius: '12px',
+      padding: '24px',
+      borderRadius: '14px',
       backgroundColor: '#fff',
       boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
       textAlign: 'left',
@@ -81,19 +82,19 @@ const LandingPage = () => {
     footer: {
       backgroundColor: '#222',
       color: '#fff',
-      padding: '60px 40px',
+      padding: '60px 60px',
       display: 'grid',
       gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
       gap: '30px',
     },
     footerTitle: {
       fontWeight: 'bold',
-      marginBottom: '10px',
-      fontSize: '16px',
+      marginBottom: '12px',
+      fontSize: '18px',
     },
     footerLink: {
-      marginBottom: '6px',
-      fontSize: '14px',
+      marginBottom: '8px',
+      fontSize: '15px',
       color: '#ccc',
       cursor: 'pointer',
     },
@@ -101,16 +102,15 @@ const LandingPage = () => {
 
   return (
     <div style={styles.container}>
-      {/* Navbar Component */}
       <Navbar />
 
       {/* Hero Section */}
       <section style={styles.hero}>
         <div style={styles.heroText}>
-          <h1 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '20px' }}>
+          <h1 style={{ fontSize: '48px', fontWeight: 'bold', marginBottom: '24px' }}>
             Plan Your Events with <span style={{ color: '#A33F5E' }}>Ease</span>
           </h1>
-          <p style={{ fontSize: '18px', lineHeight: '1.6' }}>
+          <p style={{ fontSize: '20px', lineHeight: '1.8' }}>
             Your all-in-one platform for seamless event planning. Connect with vendors,
             manage budgets, and coordinate guests — all in one place.
           </p>
@@ -121,14 +121,14 @@ const LandingPage = () => {
 
       {/* Features Section */}
       <section style={{ ...styles.section, ...styles.featureSection }}>
-        <h2 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '10px' }}>
+        <h2 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '16px' }}>
           Everything You Need for Successful Events
         </h2>
-        <p style={{ marginBottom: '30px' }}>
+        <p style={{ fontSize: '18px' }}>
           Simplify your event planning with our comprehensive set of features designed to make your life easier.
         </p>
         <div style={styles.featureGrid}>
-          {[
+          {[ 
             { title: 'Event Dashboard', color: '#dff0ff' },
             { title: 'Vendor Marketplace', color: '#ffe5e5' },
             { title: 'Budget Tracker', color: '#e0ffe2' },
@@ -137,8 +137,8 @@ const LandingPage = () => {
             { title: 'Business Growth', color: '#ffe6ed' },
           ].map((f, i) => (
             <div key={i} style={{ ...styles.featureCard, backgroundColor: f.color }}>
-              <h4 style={{ fontSize: '18px', fontWeight: 'bold' }}>{f.title}</h4>
-              <p>Some short description...</p>
+              <h4 style={{ fontSize: '20px', fontWeight: 'bold' }}>{f.title}</h4>
+              <p>Short description of the feature...</p>
             </div>
           ))}
         </div>
@@ -146,8 +146,8 @@ const LandingPage = () => {
 
       {/* How It Works */}
       <section style={{ ...styles.section, ...styles.howItWorks }}>
-        <h2 style={{ fontSize: '28px', fontWeight: 'bold' }}>How EventEase Works</h2>
-        <p style={{ color: '#A33F5E', fontWeight: 'bold', marginBottom: '30px' }}>
+        <h2 style={{ fontSize: '32px', fontWeight: 'bold' }}>How EventEase Works</h2>
+        <p style={{ color: '#A33F5E', fontWeight: 'bold', fontSize: '18px', marginBottom: '30px' }}>
           Planning an event has never been easier.
         </p>
         <div style={styles.stepsGrid}>
@@ -156,15 +156,17 @@ const LandingPage = () => {
             { step: '2', title: 'Find & Book Vendors' },
             { step: '3', title: 'Manage Your Budget' },
             { step: '4', title: 'Coordinate Guests' },
+            { step: '5', title: 'Track Progress in Dashboard' },
+            { step: '6', title: 'Switch to Backup Vendors if Needed' },
           ].map((s, i) => (
             <div key={i} style={styles.stepCard}>
-              <h3 style={{ fontSize: '22px', color: '#A33F5E' }}>{s.step}</h3>
-              <h4 style={{ fontSize: '18px', fontWeight: 'bold' }}>{s.title}</h4>
-              <p>Step description goes here...</p>
+              <h3 style={{ fontSize: '24px', color: '#A33F5E' }}>{s.step}</h3>
+              <h4 style={{ fontSize: '20px', fontWeight: 'bold' }}>{s.title}</h4>
+              <p>Details about this step go here...</p>
             </div>
           ))}
         </div>
-        <button style={{ ...styles.pinkButton, marginTop: '40px' }}>Start Planning</button>
+        <button style={{ ...styles.pinkButton, marginTop: '50px' }}>Start Planning</button>
       </section>
 
       {/* Footer */}
