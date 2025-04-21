@@ -13,9 +13,7 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  description: {
-    type: String,
-  },
+  description: String,
   organizer: {
     type: String,
     required: true,
@@ -24,15 +22,18 @@ const eventSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
-  budget: {
-    type: Number,
-  },
+  budget: Number,
   status: {
     type: String,
     enum: ['Planning', 'Confirmed', 'Completed', 'Cancelled'],
     default: 'Planning',
-  }
+  },
+  vendors: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Vendor',
+    }
+  ]
 }, { timestamps: true });
 
-// ✅ Avoid OverwriteModelError
 module.exports = mongoose.models.Event || mongoose.model('Event', eventSchema);
