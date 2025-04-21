@@ -1,4 +1,6 @@
 const Event = require("../models/event");
+const Vendor = require("../models/Vendor");
+const User = require("../models/User");
 
 // Create Event (Write)
 const createEvent = async (req, res) => {
@@ -12,21 +14,12 @@ const createEvent = async (req, res) => {
       guests,
       budget,
       status,
+      vendorIds, // Add this for associated vendors
     } = req.body;
 
     if (!title || !date || !location || !organizer) {
-      return res
-        .status(400)
-        .json({ message: "Missing required fields: title, date, location, organizer" });
-    }
-
-    if (
-      typeof title !== "string" ||
-      typeof location !== "string" ||
-      typeof organizer !== "string"
-    ) {
       return res.status(400).json({
-        message: "Title, location, and organizer must be strings",
+        message: "Missing required fields: title, date, location, organizer",
       });
     }
 
@@ -39,20 +32,7 @@ const createEvent = async (req, res) => {
       guests &&
       (!Array.isArray(guests) || !guests.every((g) => typeof g === "string"))
     ) {
-      return res
-        .status(400)
-        .json({ message: "Guests must be an array of strings" });
-    }
-
-    if (budget && typeof budget !== "number") {
-      return res.status(400).json({ message: "Budget must be a number" });
-    }
-
-    const allowedStatuses = ["Planning", "Confirmed", "Completed", "Cancelled"];
-    if (status && !allowedStatuses.includes(status)) {
-      return res.status(400).json({
-        message: `Invalid status. Allowed values: ${allowedStatuses.join(", ")}`,
-      });
+      return res.status(400).json({ message: "Guests must be an array of strings" });
     }
 
     const newEvent = new Event({
@@ -64,12 +44,11 @@ const createEvent = async (req, res) => {
       guests,
       budget,
       status,
+      vendorIds, // Add vendors to the event
     });
 
     await newEvent.save();
-    res
-      .status(201)
-      .json({ message: "Event created successfully", event: newEvent });
+    res.status(201).json({ message: "Event created successfully", event: newEvent });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -101,7 +80,7 @@ const updateEvent = async (req, res) => {
 // Get All Events (Read)
 const getAllEvents = async (req, res) => {
   try {
-    const events = await Event.find();
+    const events = await Event.find().populate("vendorIds"); // Populate vendor data
     res.status(200).json(events);
   } catch (err) {
     console.error(err);
@@ -113,7 +92,7 @@ const getAllEvents = async (req, res) => {
 const getEventById = async (req, res) => {
   try {
     const eventId = req.params.id;
-    const event = await Event.findById(eventId);
+    const event = await Event.findById(eventId).populate("vendorIds"); // Populate vendor data
 
     if (!event) {
       return res.status(404).json({ message: "Event not found" });
@@ -143,10 +122,49 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+// Create Vendor (Write) (New Endpoint)
+const createVendor = async (req, res) => {
+  try {
+    const { name, type, contactDetails, servicesOffered } = req.body;
+
+    if (!name || !type || !contactDetails) {
+      return res.status(400).json({
+        message: "Missing required fields: name, type, contactDetails",
+      });
+    }
+
+    const newVendor = new Vendor({
+      name,
+      type,
+      contactDetails,
+      servicesOffered,
+    });
+
+    await newVendor.save();
+    res.status(201).json({ message: "Vendor created successfully", vendor: newVendor });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get All Vendors (Read) (New Endpoint)
+const getAllVendors = async (req, res) => {
+  try {
+    const vendors = await Vendor.find();
+    res.status(200).json(vendors);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   createEvent,
   updateEvent,
   getAllEvents,
   getEventById,
   deleteEvent,
+  createVendor,    // Expose vendor creation functionality
+  getAllVendors,  // Expose vendor retrieval functionality
 };
