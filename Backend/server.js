@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const eventRoutes = require("./routes/eventRoutes");
 const vendorRoutes = require("./routes/vendorRoutes");  // Import the vendor routes
+const authRoutes = require("./routes/authRoutes");
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ mongoose.connect(process.env.MONGO_URI, {
   // Define routes for events and vendors
   app.use("/api/events", eventRoutes);
   app.use('/api/vendors', vendorRoutes);
+  app.use("/api/auth", authRoutes);
 
 
   // Home route
