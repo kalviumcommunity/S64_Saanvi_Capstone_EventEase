@@ -1,189 +1,360 @@
-import React from 'react';
-import Navbar from '../components/NavBar';
+import React, { useEffect } from 'react';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+import cakeimage from '../assets/image.png';
+const features = [
+  {
+    title: 'Event Dashboard',
+    description: 'A central hub for tracking event progress, task completion, budgeting, and scheduling.',
+    icon: '📋',
+    bgColor: '#cceeff',
+  },
+  {
+    title: 'Vendor Marketplace',
+    description: 'Browse, search, filter, and book vendors based on location, price range, and ratings.',
+    icon: '🤝',
+    bgColor: '#ffe0cc',
+  },
+  {
+    title: 'Budget Tracker',
+    description: 'Monitor event expenses, log payments, and track balances to stay within budget.',
+    icon: '🐷',
+    bgColor: '#d4f7b8',
+  },
+  {
+    title: 'Guest Management',
+    description: 'Manage guest lists, send invitations, and track RSVPs with real-time responses.',
+    icon: '👥',
+    bgColor: '#e5ccff',
+  },
+  {
+    title: 'Event Logistics',
+    description: 'Track vendor statuses, deliveries, and task progress for seamless execution.',
+    icon: '🚚',
+    bgColor: '#fdf4b2',
+  },
+  {
+    title: 'Business Growth',
+    description: 'Vendor tools including performance dashboards and insights for business growth.',
+    icon: '📈',
+    bgColor: '#ffcccc',
+  },
+];
+
+const howItWorks = [
+  {
+    title: 'Create Your Event',
+    description: 'Set up your event details, including date, location, event type, and estimated budget.',
+    icon: '👜',
+    bgColor: '#ffb3b3',
+  },
+  {
+    title: 'Find & Book Vendors',
+    description: 'Browse our marketplace of verified vendors, read reviews, and book the perfect match for your event.',
+    icon: '📋',
+    bgColor: '#b2f2d0',
+  },
+  {
+    title: 'Manage Your Budget',
+    description: 'Track all expenses, payments, and outstanding balances to stay within your planned budget.',
+    icon: '🐖',
+    bgColor: '#9fe3e3',
+  },
+  {
+    title: 'Coordinate Guests',
+    description: 'Create guest lists, send custom invitations, and track RSVPs in real-time.',
+    icon: '👤👤',
+    bgColor: '#e8c2ff',
+  },
+];
 
 const LandingPage = () => {
-  const styles = {
-    container: {
-      fontFamily: 'Arial, sans-serif',
-      background: 'linear-gradient(to bottom right, #FFF8F0, #F5FADC)',
-      color: '#000',
-      margin: 0,
-      padding: 0,
-      width: '100%',
-    },
-    hero: {
-      display: 'flex',
-      flexWrap: 'wrap',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '80px 60px',
-      minHeight: '100vh',
-      backgroundColor: 'transparent',
-    },
-    heroText: {
-      maxWidth: '600px',
-      flex: 1,
-      animation: 'fadeIn 1s ease-in-out',
-    },
-    pinkButton: {
-      marginTop: '30px',
-      backgroundColor: '#FF3DAB',
-      color: '#fff',
-      border: 'none',
-      padding: '16px 32px',
-      borderRadius: '12px',
-      cursor: 'pointer',
-      fontWeight: 'bold',
-      fontSize: '18px',
-      transition: 'transform 0.3s ease',
-    },
-    heroImage: {
-      maxWidth: '380px',
-      borderRadius: '14px',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-      marginTop: '30px',
-      animation: 'slideIn 1s ease-in-out',
-    },
-    section: {
-      padding: '80px 60px',
-    },
-    featureSection: {
-      backgroundColor: '#E6FFC8',
-    },
-    featureGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-      gap: '32px',
-      marginTop: '40px',
-    },
-    featureCard: {
-      padding: '24px',
-      borderRadius: '14px',
-      boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-      transition: 'transform 0.3s ease',
-    },
-    howItWorks: {
-      textAlign: 'center',
-      backgroundColor: '#FFF0FA',
-    },
-    stepsGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-      gap: '30px',
-      marginTop: '40px',
-    },
-    stepCard: {
-      padding: '24px',
-      borderRadius: '14px',
-      backgroundColor: '#fff',
-      boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-      textAlign: 'left',
-    },
-    footer: {
-      backgroundColor: '#222',
-      color: '#fff',
-      padding: '60px 60px',
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-      gap: '30px',
-    },
-    footerTitle: {
-      fontWeight: 'bold',
-      marginBottom: '12px',
-      fontSize: '18px',
-    },
-    footerLink: {
-      marginBottom: '8px',
-      fontSize: '15px',
-      color: '#ccc',
-      cursor: 'pointer',
-    },
-  };
+  useEffect(() => {
+    AOS.init({ duration: 800, once: true });
+  }, []);
 
   return (
-    <div style={styles.container}>
-      <Navbar />
+    <div style={{ fontFamily: "'Segoe UI', sans-serif", background: '#f4fbe8', color: '#222' }}>
+
+      {/* Navbar */}
+      <header style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '20px 10%',
+        backgroundColor: '#ffffff',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000,
+      }}>
+        <div style={{ fontSize: '28px', fontWeight: '700', color: '#e6007e' }}>
+          EventEase
+        </div>
+        <nav style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+          <a href="#dashboard" style={{ textDecoration: 'none', color: '#333', fontSize: '16px', fontWeight: '500' }}>Dashboard</a>
+          <a href="#features" style={{ textDecoration: 'none', color: '#333', fontSize: '16px', fontWeight: '500' }}>Features</a>
+          <a href="#reviews" style={{ textDecoration: 'none', color: '#333', fontSize: '16px', fontWeight: '500' }}>Reviews</a>
+          <a href="/login">
+            <button style={{
+              padding: '8px 18px',
+              borderRadius: '6px',
+              backgroundColor: '#fff',
+              color: '#e6007e',
+              fontWeight: '600',
+              border: '2px solid #e6007e',
+              cursor: 'pointer',
+              transition: 'all 0.3s'
+            }}
+              onMouseOver={e => {
+                e.currentTarget.style.backgroundColor = '#e6007e';
+                e.currentTarget.style.color = '#fff';
+              }}
+              onMouseOut={e => {
+                e.currentTarget.style.backgroundColor = '#fff';
+                e.currentTarget.style.color = '#e6007e';
+              }}
+            >Login</button>
+          </a>
+          <a href="/signup">
+            <button style={{
+              padding: '10px 20px',
+              borderRadius: '6px',
+              backgroundColor: '#e6007e',
+              color: '#fff',
+              fontWeight: '600',
+              border: 'none',
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              transition: 'transform 0.2s ease',
+            }}
+              onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
+              onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+            >Sign Up</button>
+          </a>
+        </nav>
+      </header>
 
       {/* Hero Section */}
-      <section style={styles.hero}>
-        <div style={styles.heroText}>
-          <h1 style={{ fontSize: '48px', fontWeight: 'bold', marginBottom: '24px' }}>
-            Plan Your Events with <span style={{ color: '#A33F5E' }}>Ease</span>
+      <section
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '80px 10%',
+          gap: '60px',
+        }}
+      >
+        <div data-aos="fade-right" style={{ flex: 1 }}>
+          <h1 style={{ fontSize: '69px', marginBottom: '26px' }}>
+            Plan Your Events with <span style={{ color: '#e6007e' }}>Ease</span>
           </h1>
-          <p style={{ fontSize: '20px', lineHeight: '1.8' }}>
-            Your all-in-one platform for seamless event planning. Connect with vendors,
-            manage budgets, and coordinate guests — all in one place.
+          <p style={{ fontSize: '28px', lineHeight: '1.6', maxWidth: '600px' }}>
+            Your all-in-one platform for seamless event planning. Connect with vendors, manage budgets, and coordinate guests — all in one place.
           </p>
-          <button style={styles.pinkButton}>Start Planning</button>
+          <button
+            style={{
+              marginTop: '30px',
+              padding: '16px 28px',
+              fontSize: '34px',
+              background: '#e6007e',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
+            }}
+          >
+            Start Planning
+          </button>
         </div>
-        <img src="/hero-image.jpg" alt="Event" style={styles.heroImage} />
+        <div data-aos="fade-left" style={{ flex: 1, textAlign: 'center' }}>
+          <img
+            src={cakeimage}
+            alt="Event Decor"
+            style={{
+              width: '100%',
+              maxWidth: '1000px',
+              borderRadius: '12px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+            }}
+          />
+        </div>
       </section>
 
       {/* Features Section */}
-      <section style={{ ...styles.section, ...styles.featureSection }}>
-        <h2 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '16px' }}>
+      <section style={{ padding: '60px 10%' }}>
+        <h2 data-aos="fade-up" style={{ textAlign: 'center', fontSize: '36px', fontWeight: '700', marginBottom: '10px' }}>
           Everything You Need for Successful Events
         </h2>
-        <p style={{ fontSize: '18px' }}>
+        <p
+          data-aos="fade-up"
+          data-aos-delay="100"
+          style={{
+            textAlign: 'center',
+            fontSize: '20px',
+            color: '#5a005f',
+            maxWidth: '700px',
+            margin: '0 auto 40px auto',
+            fontWeight: '500',
+          }}
+        >
           Simplify your event planning with our comprehensive set of features designed to make your life easier.
         </p>
-        <div style={styles.featureGrid}>
-          {[ 
-            { title: 'Event Dashboard', color: '#dff0ff' },
-            { title: 'Vendor Marketplace', color: '#ffe5e5' },
-            { title: 'Budget Tracker', color: '#e0ffe2' },
-            { title: 'Guest Management', color: '#f1e5ff' },
-            { title: 'Event Logistics', color: '#fff8ce' },
-            { title: 'Business Growth', color: '#ffe6ed' },
-          ].map((f, i) => (
-            <div key={i} style={{ ...styles.featureCard, backgroundColor: f.color }}>
-              <h4 style={{ fontSize: '20px', fontWeight: 'bold' }}>{f.title}</h4>
-              <p>Short description of the feature...</p>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '30px',
+          }}
+        >
+          {features.map((feature, index) => (
+            <div
+              key={index}
+              data-aos="fade-up"
+              data-aos-delay={index * 100}
+              style={{
+                background: feature.bgColor,
+                padding: '30px',
+                borderRadius: '16px',
+                boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
+                transition: 'transform 0.3s, box-shadow 0.3s',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 10px 28px rgba(0,0,0,0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.1)';
+              }}
+            >
+              <div style={{ fontSize: '36px', marginBottom: '10px' }}>{feature.icon}</div>
+              <h3 style={{ fontSize: '22px', fontWeight: '700', marginBottom: '10px' }}>{feature.title}</h3>
+              <p style={{ fontSize: '16px', lineHeight: '1.6' }}>{feature.description}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* How It Works */}
-      <section style={{ ...styles.section, ...styles.howItWorks }}>
-        <h2 style={{ fontSize: '32px', fontWeight: 'bold' }}>How EventEase Works</h2>
-        <p style={{ color: '#A33F5E', fontWeight: 'bold', fontSize: '18px', marginBottom: '30px' }}>
-          Planning an event has never been easier.
+      {/* How EventEase Works Section */}
+      <section style={{ padding: '60px 10%', background: '#edf9d9' }}>
+        <h2 data-aos="fade-up" style={{ textAlign: 'center', fontSize: '36px', fontWeight: '700', marginBottom: '10px' }}>
+          How EventEase Works
+        </h2>
+        <p
+          data-aos="fade-up"
+          data-aos-delay="100"
+          style={{
+            textAlign: 'center',
+            fontSize: '20px',
+            color: '#9d00a7',
+            maxWidth: '700px',
+            margin: '0 auto 40px auto',
+            fontWeight: '500',
+          }}
+        >
+          Planning an event has never been easier. Follow these simple steps to create a memorable event with minimal stress.
         </p>
-        <div style={styles.stepsGrid}>
-          {[
-            { step: '1', title: 'Create Your Event' },
-            { step: '2', title: 'Find & Book Vendors' },
-            { step: '3', title: 'Manage Your Budget' },
-            { step: '4', title: 'Coordinate Guests' },
-            { step: '5', title: 'Track Progress in Dashboard' },
-            { step: '6', title: 'Switch to Backup Vendors if Needed' },
-          ].map((s, i) => (
-            <div key={i} style={styles.stepCard}>
-              <h3 style={{ fontSize: '24px', color: '#A33F5E' }}>{s.step}</h3>
-              <h4 style={{ fontSize: '20px', fontWeight: 'bold' }}>{s.title}</h4>
-              <p>Details about this step go here...</p>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '30px',
+          }}
+        >
+          {howItWorks.map((step, index) => (
+            <div
+              key={index}
+              data-aos="zoom-in"
+              data-aos-delay={index * 100}
+              style={{
+                background: step.bgColor,
+                padding: '30px',
+                borderRadius: '16px',
+                boxShadow: '0 6px 16px rgba(0,0,0,0.1)',
+                position: 'relative',
+              }}
+            >
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  left: '16px',
+                  fontSize: '22px',
+                  fontWeight: 'bold',
+                  color: '#b30000',
+                }}
+              >
+                {index + 1}
+              </span>
+              <div style={{ fontSize: '32px', marginBottom: '10px' }}>{step.icon}</div>
+              <h3 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '10px' }}>{step.title}</h3>
+              <p style={{ fontSize: '16px', lineHeight: '1.6' }}>{step.description}</p>
             </div>
           ))}
         </div>
-        <button style={{ ...styles.pinkButton, marginTop: '50px' }}>Start Planning</button>
+
+        <div style={{ textAlign: 'center', marginTop: '40px' }}>
+          <button
+            style={{
+              padding: '14px 32px',
+              background: '#e6007e',
+              color: '#fff',
+              fontSize: '18px',
+              fontWeight: '600',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+            }}
+          >
+            Start Planning
+          </button>
+        </div>
       </section>
 
       {/* Footer */}
-      <footer style={styles.footer}>
-        {[
-          { title: 'EventEase', links: ['All-in-one platform', 'Guest & vendor management'] },
-          { title: 'About', links: ['Features', 'Marketplace', 'Dashboard'] },
-          { title: 'Company', links: ['Contact Us', 'Blog', 'Team'] },
-          { title: 'Legal', links: ['Terms', 'Privacy', 'Cookies'] },
-        ].map((col, i) => (
-          <div key={i}>
-            <div style={styles.footerTitle}>{col.title}</div>
-            {col.links.map((l, j) => (
-              <div key={j} style={styles.footerLink}>{l}</div>
-            ))}
+      <footer style={{ background: '#1a1a1a', color: '#fff', padding: '20px 10%' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '2fr 1fr 1fr 1fr',
+            gap: '20px',
+            marginBottom: '40px',
+          }}
+        >
+          <div>
+            <h3 style={{ fontSize: '39px', marginBottom: '23px', color: '#ff66a3' }}>EventEase</h3>
+            <p style={{ fontSize: '26px', lineHeight: '1.6' }}>
+              Your all-in-one platform for event planning, coordination, and execution.
+            </p>
           </div>
-        ))}
+          <div>
+            <h4 style={{ fontSize: '45px', marginBottom: '35px', color: '#ff99cc' }}>About</h4>
+            <p>Features</p>
+            <p>How it works</p>
+            <p>Pricing</p>
+          </div>
+          <div>
+            <h4 style={{ fontSize: '45px', marginBottom: '35px', color: '#ff99cc' }}>Company</h4>
+            <p>Contact</p>
+            <p>Careers</p>
+            <p>Press</p>
+          </div>
+          <div>
+            <h4 style={{ fontSize: '45px', marginBottom: '35px', color: '#ff99cc' }}>Legal</h4>
+            <p>Terms</p>
+            <p>Privacy</p>
+            <p>Cookies</p>
+          </div>
+        </div>
+        <div style={{ textAlign: 'center', fontSize: '30px', color: '#aaa' }}>
+          © {new Date().getFullYear()} EventEase. All rights reserved.
+        </div>
       </footer>
     </div>
   );
