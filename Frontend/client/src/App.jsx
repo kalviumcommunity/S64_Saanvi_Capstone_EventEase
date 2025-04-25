@@ -10,6 +10,7 @@ import Guests from './pages/Guests';
 import Budget from './pages/Budget';
 import AddBudget from './pages/AddBudget';
 import Reviews from './pages/Reviews';
+import Profile from './pages/Profile';
 import LandingPage from './pages/LandingPage';
 import { NotificationProvider } from './context/NotificationContext';
 
@@ -33,7 +34,6 @@ const App = () => {
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              <Route path="/home" element={<Home />} />
 
               {/* Protected Routes */}
               <Route
@@ -89,6 +89,14 @@ const App = () => {
                 element={
                   <ProtectedRoute>
                     <Reviews />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
                   </ProtectedRoute>
                 }
               />
