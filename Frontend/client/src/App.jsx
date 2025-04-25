@@ -1,31 +1,105 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import LandingPage from './pages/LandingPage';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Home from './pages/Home';
 import Login from './pages/Login';
-import SignUp from './pages/Signup';
+import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
+import Vendor from './pages/Vendor';
+import Guests from './pages/Guests';
+import Budget from './pages/Budget';
+import AddBudget from './pages/AddBudget';
+import Reviews from './pages/Reviews';
+import LandingPage from './pages/LandingPage';
+import { NotificationProvider } from './context/NotificationContext';
+
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { user } = useAuth();
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+  return children;
+};
 
 const App = () => {
-  const isAuthenticated = !!localStorage.getItem('token');
-
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route 
-          path="/login" 
-          element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} 
-        />
-        <Route 
-          path="/signup" 
-          element={isAuthenticated ? <Navigate to="/dashboard" /> : <SignUp />} 
-        />
-        <Route 
-          path="/dashboard" 
-          element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} 
-        />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <NotificationProvider>
+        <Router>
+          <div className="app">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/home" element={<Home />} />
+
+              {/* Protected Routes */}
+              <Route
+                path="/home"
+                element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/vendor"
+                element={
+                  <ProtectedRoute>
+                    <Vendor />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/guests"
+                element={
+                  <ProtectedRoute>
+                    <Guests />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/budget"
+                element={
+                  <ProtectedRoute>
+                    <Budget />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/budget/add"
+                element={
+                  <ProtectedRoute>
+                    <AddBudget />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/reviews"
+                element={
+                  <ProtectedRoute>
+                    <Reviews />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Catch all route - 404 */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+        </Router>
+      </NotificationProvider>
+    </AuthProvider>
   );
 };
 
