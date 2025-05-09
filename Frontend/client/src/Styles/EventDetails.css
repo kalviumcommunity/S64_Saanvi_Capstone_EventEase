@@ -1,0 +1,31 @@
+.soon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    background: #f9f6f2;
+  }
+  
+  .soon-card {
+    background: #fffbe8;
+    padding: 40px 30px;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px #e0d6c3;
+    text-align: center;
+  }
+  
+  .back-btn {
+    margin-top: 18px;
+    background: #ffd54f;
+    color: #333;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 24px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .back-btn:hover {
+    background: #ffe082;
+  }
+  

@@ -1,0 +1,425 @@
+/* BudgetManagementPage.css */
+:root {
+    --primary-color: #f8e8e2;
+    --secondary-color: #f9cec3;
+    --text-color: #333;
+    --border-color: #ddc5b9;
+    --light-bg: #f9f5e7;
+    --highlight: #e8a87c;
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .budget-page {
+    background-color: var(--primary-color);
+    min-height: 100vh;
+  }
+  
+  /* Header */
+  .budget-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    background-color: var(--secondary-color);
+  }
+  
+  .logo-container {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+  }
+  
+  .navigation {
+    display: flex;
+    gap: 1.5rem;
+  }
+  
+  .navigation a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 500;
+  }
+  
+  .navigation a.active {
+    font-weight: 700;
+    border-bottom: 2px solid var(--text-color);
+  }
+  
+  .profile-link {
+    margin-left: 2rem;
+  }
+  
+  /* Main Content */
+  .budget-container {
+    padding: 1.5rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .page-subtitle {
+    text-align: center;
+    color: #555;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Budget Summary Cards */
+  .budget-summary {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+  
+  .budget-card {
+    background-color: var(--light-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    width: 32%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .budget-card h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .card-value-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .budget-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .budget-value.editable {
+    border: none;
+    background: transparent;
+    font-size: 1.5rem;
+    font-weight: bold;
+    width: 80%;
+    outline: none;
+  }
+  
+  .budget-icon {
+    font-size: 1.5rem;
+  }
+  
+  /* Budget Content */
+  .budget-content {
+    display: flex;
+    gap: 2rem;
+  }
+  
+  /* Budget Breakdown */
+  .budget-breakdown {
+    background-color: var(--light-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    flex: 0 0 30%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .budget-breakdown h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .category-bars {
+    margin-bottom: 1.5rem;
+  }
+  
+  .category-item {
+    margin-bottom: 1rem;
+  }
+  
+  .category-label {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+  }
+  
+  .category-bar-container {
+    height: 8px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .category-bar {
+    height: 100%;
+    border-radius: 4px;
+  }
+  
+  /* Breakdown Summary */
+  .breakdown-summary {
+    margin-top: 1.5rem;
+  }
+  
+  .breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  
+  .breakdown-label {
+    font-weight: 500;
+  }
+  
+  .breakdown-value {
+    font-weight: 600;
+  }
+  
+  /* Budget Items */
+  .budget-items {
+    background-color: var(--light-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    flex: 1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .budget-items-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .budget-items-header h2 {
+    font-size: 1.2rem;
+    margin-right: auto;
+  }
+  
+  .add-button {
+    background-color: var(--highlight);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 1rem;
+  }
+  
+  .tabs {
+    display: flex;
+  }
+  
+  .tabs button {
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .tabs button.tab-active {
+    border-bottom: 2px solid var(--highlight);
+    font-weight: 700;
+  }
+  
+  /* Add Item Form */
+  .add-item-form {
+    background-color: var(--primary-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .form-group {
+    flex: 1;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--secondary-color);
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+  }
+  
+  .cancel-button {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+  }
+  
+  .submit-button {
+    background-color: var(--highlight);
+    color: white;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .submit-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  /* Budget Table */
+  .budget-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .budget-table th,
+  .budget-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .budget-table th {
+    font-weight: 600;
+  }
+  
+  .item-name-col {
+    max-width: 200px;
+  }
+  
+  .item-name {
+    font-weight: 500;
+  }
+  
+  .item-category {
+    font-size: 0.8rem;
+    color: #666;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+  }
+  
+  .status-badge.paid {
+    background-color: #c8e6c9;
+    color: #2e7d32;
+  }
+  
+  .status-badge.pending {
+    background-color: #ffecb3;
+    color: #f57f17;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 950px) {
+    .budget-content {
+      flex-direction: column;
+    }
+    
+    .budget-breakdown {
+      width: 100%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .budget-summary {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .budget-card {
+      width: 100%;
+    }
+    
+    .form-row {
+      flex-direction: column;
+    }
+  }
+  body, .budget-page, .budget-container {
+    color: #222 !important; /* Ensures all text is dark */
+  }
+  
+  .budget-header,
+  .navigation a,
+  .budget-title,
+  .budget-subtitle,
+  .budget-summary-card,
+  .budget-breakdown,
+  .budget-items,
+  .budget-items-header,
+  .budget-table th,
+  .budget-table td,
+  .add-item-form label,
+  .add-item-form input,
+  .tabs button,
+  .status-badge,
+  .breakdown-label,
+  .breakdown-value,
+  .category-label {
+    color: #222 !important; /* Force dark text everywhere */
+  }
+  
+  input, select, textarea {
+    color: #222 !important;
+  }
+  
+  input::placeholder {
+    color: #444 !important;
+    opacity: 1;
+  }
+  
+  .budget-card h3,
+  .budget-card .budget-value,
+  .budget-card input {
+    color: #222 !important;
+  }
+  
+  .budget-items-header h2,
+  .budget-items-title,
+  .add-button,
+  .tabs button {
+    color: #222 !important;
+  }
+  
+  .status-badge.paid {
+    background-color: #c8e6c9;
+    color: #226622 !important;
+  }
+  .status-badge.pending {
+    background-color: #ffecb3;
+    color: #a67c00 !important;
+  }
+    

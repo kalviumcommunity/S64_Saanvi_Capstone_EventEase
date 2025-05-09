@@ -8,6 +8,10 @@ const eventRoutes = require("./routes/eventRoutes");
 const vendorRoutes = require("./routes/vendorRoutes");
 const authRoutes = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
+const budgetItem = require("./routes/budgetItem");
+const reviewRoutes = require("./routes/reviewRoutes");
+const guestRoutes = require("./routes/guestsRoutes");
+const dashboard = require("./routes/Dashboard");
 
 dotenv.config();
 
@@ -51,7 +55,10 @@ app.use("/api/events", eventRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
-
+app.use("/api/budget", budgetItem);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/guests", guestRoutes);
+app.use("/api/dashboard", dashboard);
 // Home route for testing
 app.get("/api", (req, res) => {
   res.json({ message: "Hello from EventEase server!" });
