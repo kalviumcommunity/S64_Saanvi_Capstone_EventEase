@@ -14,4 +14,4 @@ const EventSchema = new mongoose.Schema({
   tasks: [TaskSchema]
 });
 
-module.exports = mongoose.models.DashboardEvent || mongoose.model("DashboardEvent", EventSchema); 
+module.exports = mongoose.model("Event", EventSchema);

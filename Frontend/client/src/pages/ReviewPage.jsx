@@ -156,37 +156,6 @@ function ReviewPage() {
 
   return (
     <div className="review-page">
-      {/* NAVBAR */}
-      <nav className="navbar">
-        <div className="nav-left">
-          <img src={logo} alt="EventEase" className="logo" />
-          <div className="nav-links">
-            {navSections.map((section) => (
-              <button
-                key={section}
-                className={`nav-link ${activeSection === section ? "active" : ""}`}
-                onClick={() => navigateToSection(section)}
-              >
-                {section.charAt(0).toUpperCase() + section.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
-        <button className="profile-btn">
-          <img
-            src={user?.avatar || "/default-avatar.png"}
-            alt=""
-            style={{
-              width: "24px",
-              height: "24px",
-              borderRadius: "50%",
-              marginRight: "0.5rem"
-            }}
-          />
-          <span>{user?.username || "Profile"}</span>
-        </button>
-      </nav>
-
       <main className="review-main">
         <h1 className="review-title">USER REVIEWS</h1>
         <p className="review-subtitle">

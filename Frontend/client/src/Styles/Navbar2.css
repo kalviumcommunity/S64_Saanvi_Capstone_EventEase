@@ -16,13 +16,15 @@
   }
   
   .navbar-logo img {
-    width: 48px;
-    height: 48px;
-    background: #fff;
-    border-radius: 50%;
-    border: 2px solid #222;
-    margin-right: 0.5rem;
-    object-fit: cover;
+    width: 72px;
+    height: 72px;
+    border-radius: 0 !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18), 0 1.5px 0 #fff;
+    background: none !important;
+    margin-right: 1.2rem;
+    margin-bottom: 4px;
+    object-fit: contain;
+    border: 3px solid #fff;
   }
   
   .navbar-brand {

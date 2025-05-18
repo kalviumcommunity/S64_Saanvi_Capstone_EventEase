@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import cakeimage from '../assets/image.png';
+import Navbar from '../components/NavBar';
+
 const features = [
   {
     title: 'Event Dashboard',
@@ -75,66 +77,8 @@ const LandingPage = () => {
 
   return (
     <div style={{ fontFamily: "'Segoe UI', sans-serif", background: '#f4fbe8', color: '#222' }}>
-
       {/* Navbar */}
-      <header style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '20px 10%',
-        backgroundColor: '#ffffff',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 1000,
-      }}>
-        <div style={{ fontSize: '28px', fontWeight: '700', color: '#e6007e' }}>
-          EventEase
-        </div>
-        <nav style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-          <a href="#dashboard" style={{ textDecoration: 'none', color: '#333', fontSize: '16px', fontWeight: '500' }}>Dashboard</a>
-          <a href="#features" style={{ textDecoration: 'none', color: '#333', fontSize: '16px', fontWeight: '500' }}>Features</a>
-          <a href="#reviews" style={{ textDecoration: 'none', color: '#333', fontSize: '16px', fontWeight: '500' }}>Reviews</a>
-          <a href="/login">
-            <button style={{
-              padding: '8px 18px',
-              borderRadius: '6px',
-              backgroundColor: '#fff',
-              color: '#e6007e',
-              fontWeight: '600',
-              border: '2px solid #e6007e',
-              cursor: 'pointer',
-              transition: 'all 0.3s'
-            }}
-              onMouseOver={e => {
-                e.currentTarget.style.backgroundColor = '#e6007e';
-                e.currentTarget.style.color = '#fff';
-              }}
-              onMouseOut={e => {
-                e.currentTarget.style.backgroundColor = '#fff';
-                e.currentTarget.style.color = '#e6007e';
-              }}
-            >Login</button>
-          </a>
-          <a href="/signup">
-            <button style={{
-              padding: '10px 20px',
-              borderRadius: '6px',
-              backgroundColor: '#e6007e',
-              color: '#fff',
-              fontWeight: '600',
-              border: 'none',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              transition: 'transform 0.2s ease',
-            }}
-              onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
-              onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-            >Sign Up</button>
-          </a>
-        </nav>
-      </header>
-
+      <Navbar />
       {/* Hero Section */}
       <section
         style={{
@@ -179,6 +123,55 @@ const LandingPage = () => {
               boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
             }}
           />
+        </div>
+      </section>
+
+      {/* Animated Feature Showcase Section */}
+      <section id="showcase" style={{ padding: '60px 10%' }}>
+        <h2 data-aos="fade-up" style={{ textAlign: 'center', fontSize: '40px', fontWeight: '700', marginBottom: '10px', color: '#e6007e' }}>
+          EventEase Features Showcase
+        </h2>
+        <p data-aos="fade-up" data-aos-delay="100" style={{ textAlign: 'center', fontSize: '22px', color: '#5a005f', maxWidth: '700px', margin: '0 auto 40px auto', fontWeight: '500' }}>
+          Discover how EventEase makes event planning effortless and fun!
+        </p>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))',
+          gap: '36px',
+          marginTop: '40px',
+        }}>
+          {features.map((feature, idx) => (
+            <div
+              key={feature.title}
+              data-aos="zoom-in-up"
+              data-aos-delay={idx * 100}
+              style={{
+                background: feature.bgColor,
+                borderRadius: '18px',
+                boxShadow: '0 6px 24px rgba(0,0,0,0.08)',
+                padding: '38px 28px',
+                textAlign: 'center',
+                transition: 'transform 0.3s, box-shadow 0.3s',
+                cursor: 'pointer',
+                position: 'relative',
+                overflow: 'hidden',
+                minHeight: '260px',
+                animation: 'featurePop 0.7s cubic-bezier(.68,-0.55,.27,1.55)'
+              }}
+              onMouseOver={e => {
+                e.currentTarget.style.transform = 'scale(1.06)';
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(230,0,126,0.18)';
+              }}
+              onMouseOut={e => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = '0 6px 24px rgba(0,0,0,0.08)';
+              }}
+            >
+              <div style={{ fontSize: '54px', marginBottom: '18px', animation: 'iconBounce 1.2s infinite alternate' }}>{feature.icon}</div>
+              <h3 style={{ fontSize: '26px', fontWeight: '700', marginBottom: '10px', color: '#A33F5E' }}>{feature.title}</h3>
+              <p style={{ fontSize: '18px', color: '#333', fontWeight: '500' }}>{feature.description}</p>
+            </div>
+          ))}
         </div>
       </section>
 

@@ -193,24 +193,6 @@ const BudgetManagementPage = () => {
 
   return (
     <div className="budget-page">
-      <header className="budget-header">
-        <div className="logo-container">
-          <img src="/eventease-logo.png" alt="EventEase" className="logo" />
-          <h1>EventEase</h1>
-        </div>
-        <nav className="navigation">
-          <a href="#">Home</a>
-          <a href="#">Vendor</a>
-          <a href="#">Reviews</a>
-          <a href="#" className="active">Budget</a>
-          <a href="#">Dashboard</a>
-          <a href="#">Guests</a>
-          <div className="profile-link">
-            <a href="#">Profile</a>
-          </div>
-        </nav>
-      </header>
-
       <main className="budget-container">
         <h1 className="page-title">Budget Tracker</h1>
         <p className="page-subtitle">Keep track of your event expenses and stay within your budget.</p>

@@ -56,9 +56,8 @@ const upload = multer({
 // Get user profile
 router.get('/', async (req, res) => {
   try {
-    console.log('Fetching user profile');
+    // Only fetch and return user, do not create or update
     const user = await User.findOne().select('-password');
-    console.log('Found user:', user);
     if (!user) {
       return res.status(404).json({ message: 'No users found' });
     }
@@ -72,17 +71,10 @@ router.get('/', async (req, res) => {
 // Update user profile
 router.put('/update', async (req, res) => {
   try {
-    console.log('Updating profile with data:', req.body);
-    
-    // Find the first user (for testing)
+    // Only update if user exists
     let user = await User.findOne();
     if (!user) {
-      console.log('No user found, creating test user');
-      user = new User({
-        username: 'testuser',
-        email: 'test@example.com',
-        password: 'password123'
-      });
+      return res.status(404).json({ message: 'No user found' });
     }
 
     // Update user fields
@@ -101,8 +93,6 @@ router.put('/update', async (req, res) => {
       };
     }
 
-    console.log('Applying updates:', updates);
-
     // Update the user with the new data
     const updatedUser = await User.findOneAndUpdate(
       { _id: user._id },
@@ -110,7 +100,6 @@ router.put('/update', async (req, res) => {
       { new: true, runValidators: true }
     ).select('-password');
 
-    console.log('Updated user:', updatedUser);
     res.json({ message: 'Profile updated successfully', user: updatedUser });
   } catch (err) {
     console.error('Error updating profile:', err);

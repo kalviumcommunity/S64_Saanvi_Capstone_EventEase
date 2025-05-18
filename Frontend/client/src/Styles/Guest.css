@@ -71,19 +71,68 @@
     gap: 18px;
     padding: 0 24px 12px 24px;
     font-size: 1rem;
+    margin-bottom: 10px;
+  }
+  
+  .guest-table-filters label {
+    position: relative;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .guest-table-filters input[type="checkbox"] {
+    display: none;
+  }
+  
+  .guest-table-filters label {
+    background: #f7e3c6;
+    color: #333;
+    border-radius: 18px;
+    padding: 7px 22px;
+    font-weight: 500;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    border: 2px solid transparent;
+    margin-right: 0;
+    margin-left: 0;
+    box-shadow: 0 1px 4px #e3b08a22;
+  }
+  
+  .guest-table-filters label:hover {
+    background: #ffe0b2;
+    color: #c97e5a;
+  }
+  
+  .guest-table-filters input[type="checkbox"]:checked + span,
+  .guest-table-filters label:has(input[type="checkbox"]:checked) {
+    background: #c97e5a;
+    color: #fff;
+    font-weight: 700;
+    border: 2px solid #c97e5a;
+    box-shadow: 0 2px 8px #c97e5a33;
+  }
+  
+  .guest-table-filters label span {
+    pointer-events: none;
   }
   
   .guest-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 1rem;
     background: transparent;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px #0001;
+    transition: box-shadow 0.2s;
   }
   
   .guest-table th,
   .guest-table td {
-    padding: 12px 10px;
+    padding: 14px 12px;
     text-align: left;
+    transition: background 0.2s;
   }
   
   .guest-table th {
@@ -94,6 +143,22 @@
   
   .guest-table tr {
     border-bottom: 1px solid #f7e3c6;
+    transition: background 0.2s;
+    animation: fadeInRow 0.5s;
+  }
+  
+  .guest-table tbody tr:nth-child(even) {
+    background: #fff6e9;
+  }
+  
+  .guest-table tbody tr:hover {
+    background: #ffe0b2;
+    box-shadow: 0 2px 8px #e3b08a44;
+  }
+  
+  @keyframes fadeInRow {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   
   .guest-avatar {
@@ -107,6 +172,7 @@
     text-align: center;
     line-height: 32px;
     vertical-align: middle;
+    box-shadow: 0 1px 4px #0001;
   }
   
   .action-check {
@@ -119,13 +185,24 @@
     color: #c97e5a;
     font-size: 1.2rem;
     cursor: pointer;
+    transition: color 0.2s;
+  }
+  .action-remove:hover {
+    color: #b71c1c;
   }
   
   .guest-summary {
     background: #f7e3c6;
     margin: 28px 24px 0 24px;
-    border-radius: 10px;
-    padding: 18px 24px 12px 24px;
+    border-radius: 16px;
+    padding: 24px 24px 18px 24px;
+    box-shadow: 0 2px 12px #e3b08a33;
+    animation: fadeInSummary 0.7s;
+  }
+  
+  @keyframes fadeInSummary {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
   }
   
   .guest-summary h2 {
@@ -141,29 +218,49 @@
   
   .summary-boxes {
     display: flex;
-    gap: 16px;
+    gap: 18px;
     margin-bottom: 10px;
+    flex-wrap: wrap;
   }
   
   .summary-box {
-    border-radius: 10px;
-    padding: 10px 24px;
-    font-size: 1.1rem;
+    border-radius: 14px;
+    padding: 16px 32px;
+    font-size: 1.2rem;
     font-weight: bold;
-    min-width: 100px;
+    min-width: 120px;
     text-align: center;
     background: #e3b08a;
     color: #333;
+    box-shadow: 0 2px 8px #e3b08a33;
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: fadeInBox 0.7s;
   }
   
   .summary-box.confirmed {
     background: #d6a5c0;
+    color: #fff;
   }
   .summary-box.pending {
     background: #f7e3c6;
+    color: #333;
   }
   .summary-box.declined {
     background: #e0b2b2;
+    color: #fff;
+  }
+  .summary-box.plus-one {
+    background: #b2d8e0;
+    color: #333;
+  }
+  .summary-box:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px #e3b08a55;
+  }
+  
+  @keyframes fadeInBox {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   
   .summary-footer {
@@ -183,38 +280,75 @@
     background: rgba(0,0,0,0.2);
     display: flex; align-items: center; justify-content: center;
     z-index: 1000;
+    animation: fadeInModal 0.3s;
+  }
+  @keyframes fadeInModal {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
   .guest-form {
     background: #fdf6e3;
-    padding: 32px 24px;
-    border-radius: 12px;
+    padding: 36px 28px;
+    border-radius: 16px;
     box-shadow: 0 2px 16px #0002;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    min-width: 300px;
+    gap: 18px;
+    min-width: 320px;
+    animation: fadeInModal 0.3s;
   }
   .guest-form input, .guest-form select {
     background: #e3b08a;
     border: none;
     border-radius: 18px;
-    padding: 8px 18px;
+    padding: 10px 20px;
     font-size: 1rem;
+    margin-bottom: 4px;
   }
   .form-actions {
-    display: flex; gap: 10px; justify-content: flex-end;
+    display: flex; gap: 12px; justify-content: flex-end;
   }
   .status-btn {
     background: #e3b08a;
     border: none;
     border-radius: 8px;
-    padding: 4px 12px;
+    padding: 6px 16px;
     cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s;
+  }
+  .status-btn.confirmed {
+    background: #d6a5c0;
+    color: #fff;
+  }
+  .status-btn.pending {
+    background: #f7e3c6;
+    color: #333;
+  }
+  .status-btn.declined {
+    background: #e0b2b2;
+    color: #fff;
+  }
+  .status-btn.on-time {
+    background: #b2d8e0;
+    color: #333;
+  }
+  .status-btn.a-little-late {
+    background: #ffe082;
+    color: #333;
+  }
+  .status-btn.not-responded {
+    background: #bdbdbd;
+    color: #fff;
   }
   .action-edit {
     color: #2b8a3e;
     font-size: 1.2rem;
     margin-right: 8px;
     cursor: pointer;
+    transition: color 0.2s;
+  }
+  .action-edit:hover {
+    color: #388e3c;
   }
   

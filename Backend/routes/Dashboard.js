@@ -1,8 +1,11 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const dashboardController = require('../controllers/dashboardController');
+const dashboardController = require("../controllers/dashboardController");
 
-// GET /api/dashboard/:userId/summary
-router.get('/:userId/summary', dashboardController.getUserDashboardSummary);
+// User-specific dashboard summary
+router.get("/:userId/summary", dashboardController.getUserDashboardSummary);
+
+// Common upcoming events (same for all users)
+router.get("/common/upcoming-events", dashboardController.getCommonUpcomingEvents);
 
 module.exports = router;
