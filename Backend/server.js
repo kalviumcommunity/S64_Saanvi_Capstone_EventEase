@@ -5,11 +5,10 @@ const cors = require("cors");
 const path = require("path");
 const multer = require('multer');
 const eventRoutes = require("./routes/eventRoutes");
-const vendorRoutes = require("./routes/vendorRoutes");
 const authRoutes = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const budgetItem = require("./routes/budgetItem");
-const reviewRoutes = require("./routes/reviewRoutes");
+// const reviewRoutes = require("./routes/reviewRoutes");
 const guestRoutes = require("./routes/guestsRoutes");
 const dashboard = require("./routes/Dashboard");
 
@@ -52,11 +51,10 @@ app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Define routes
 app.use("/api/events", eventRoutes);
-app.use('/api/vendors', vendorRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/budget", budgetItem);
-app.use("/api/reviews", reviewRoutes);
+// app.use("/api/reviews", reviewRoutes);
 app.use("/api/guests", guestRoutes);
 app.use("/api/dashboard", dashboard);
 // Home route for testing
@@ -72,6 +70,7 @@ app.use((err, req, res, next) => {
     type: err.name
   });
 
+  // Handle specific error types
   if (err instanceof multer.MulterError) {
     return res.status(400).json({ 
       message: 'File upload error', 
@@ -79,6 +78,28 @@ app.use((err, req, res, next) => {
     });
   }
 
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({
+      message: 'Validation Error',
+      error: err.message
+    });
+  }
+
+  if (err.name === 'JsonWebTokenError') {
+    return res.status(401).json({
+      message: 'Invalid token',
+      error: err.message
+    });
+  }
+
+  if (err.name === 'TokenExpiredError') {
+    return res.status(401).json({
+      message: 'Token expired',
+      error: err.message
+    });
+  }
+
+  // Default error response
   res.status(500).json({ 
     message: err.message || 'Something went wrong!',
     error: process.env.NODE_ENV === 'development' ? err : {}
@@ -91,10 +112,7 @@ const connectDB = async () => {
     const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/eventease';
     console.log('Connecting to MongoDB at:', mongoURI);
     
-    await mongoose.connect(mongoURI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    await mongoose.connect(mongoURI);
     
     console.log("✅ MongoDB connected successfully");
     
