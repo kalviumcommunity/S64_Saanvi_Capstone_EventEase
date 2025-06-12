@@ -141,7 +141,7 @@ const Dashboard = () => {
     <div className="dashboard-outer">
       {/* Sidebar */}
       <nav className="dashboard-nav">
-        <div className="nav-logo" onClick={() => navigate("/dashboard")}>MyApp</div>
+        <div className="nav-logo" onClick={() => navigate("/dashboard")}>EventEase</div>
         <ul>
           {NAV_ITEMS.map((item) => (
             <li key={item.label} onClick={() => navigate(item.path)}>

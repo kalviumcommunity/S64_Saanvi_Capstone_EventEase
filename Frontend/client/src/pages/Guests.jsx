@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../Styles/Guest.css";
+import { FaSearch, FaFileExport, FaEnvelope, FaEdit, FaTrash, FaCheck, FaClock, FaTimes } from "react-icons/fa";
 
 const STATUS_OPTIONS = ["Confirmed", "Pending", "Declined"];
 const TIME_OPTIONS = ["On time", "A little late", "Not responded"];
@@ -10,6 +11,7 @@ export default function Guests() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [form, setForm] = useState({
     name: "",
     contact: "",
@@ -74,6 +76,7 @@ export default function Guests() {
         setGuests(dummyGuests); // fallback to dummy data
       }
     } catch (err) {
+      console.error('Error fetching guests:', err);
       setError(err.response?.data?.message || "Failed to fetch guests. Showing sample data.");
       setGuests(dummyGuests); // fallback to dummy data
     } finally {
@@ -86,32 +89,59 @@ export default function Guests() {
     e.preventDefault();
     setError(null);
     try {
-      // Ensure plusOne is always a number
-      const submitForm = {
-        ...form,
-        plusOne: form.plusOne === '' || form.plusOne == null ? 0 : Number(form.plusOne),
-      };
-      if (editId) {
-        await axios.put(`/api/guests/${editId}`, submitForm);
-      } else {
-        await axios.post("/api/guests", submitForm);
+      // Validate form
+      if (!form.name.trim()) {
+        setError("Name is required");
+        return;
       }
-      setShowForm(false);
-      setEditId(null);
-      setForm({
-        name: "",
-        contact: "",
-        status: "Pending",
-        time: "Not responded",
-        plusOne: 0,
-      });
-      await fetchGuests();
+      if (!form.contact.trim()) {
+        setError("Contact number is required");
+        return;
+      }
+
+      // Prepare the data
+      const guestData = {
+        name: form.name.trim(),
+        contact: form.contact.trim(),
+        status: form.status || 'Pending',
+        time: form.time || 'Not responded',
+        plusOne: form.plusOne === '' || form.plusOne == null ? 0 : Number(form.plusOne)
+      };
+
+      let response;
+      if (editId) {
+        response = await axios.put(`/api/guests/${editId}`, guestData);
+      } else {
+        response = await axios.post('/api/guests', guestData);
+      }
+
+      if (response.data) {
+        // Reset form and close modal
+        setShowForm(false);
+        setEditId(null);
+        setForm({
+          name: "",
+          contact: "",
+          status: "Pending",
+          time: "Not responded",
+          plusOne: 0,
+        });
+        
+        // Refresh guest list
+        await fetchGuests();
+        
+        // Show success message
+        alert(editId ? "Guest updated successfully!" : "Guest added successfully!");
+      }
     } catch (err) {
-      setError(
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        "Failed to save guest. Please try again."
-      );
+      console.error('Error saving guest:', err);
+      const errorMessage = err.response?.data?.error || 
+                          err.response?.data?.message || 
+                          "Failed to save guest. Please try again.";
+      setError(errorMessage);
+      
+      // Show error in alert for better visibility
+      alert(`Error: ${errorMessage}`);
     }
   };
 
@@ -120,9 +150,12 @@ export default function Guests() {
     if (!window.confirm("Are you sure you want to delete this guest?")) return;
     setError(null);
     try {
-      await axios.delete(`/api/guests/${id}`);
-      await fetchGuests();
+      const res = await axios.delete(`/api/guests/${id}`);
+      if (res.data) {
+        await fetchGuests();
+      }
     } catch (err) {
+      console.error('Error deleting guest:', err);
       setError(err.response?.data?.message || "Failed to delete guest. Please try again.");
     }
   };
@@ -146,9 +179,12 @@ export default function Guests() {
     const idx = STATUS_OPTIONS.indexOf(guest.status);
     const newStatus = STATUS_OPTIONS[(idx + 1) % STATUS_OPTIONS.length];
     try {
-      await axios.put(`/api/guests/${guest._id}`, { status: newStatus });
-      await fetchGuests();
+      const res = await axios.put(`/api/guests/${guest._id}`, { status: newStatus });
+      if (res.data) {
+        await fetchGuests();
+      }
     } catch (err) {
+      console.error('Error updating status:', err);
       setError(err.response?.data?.message || "Failed to update status. Please try again.");
     }
   };
@@ -159,10 +195,53 @@ export default function Guests() {
     const idx = TIME_OPTIONS.indexOf(guest.time);
     const newTime = TIME_OPTIONS[(idx + 1) % TIME_OPTIONS.length];
     try {
-      await axios.put(`/api/guests/${guest._id}`, { time: newTime });
-      await fetchGuests();
+      const res = await axios.put(`/api/guests/${guest._id}`, { time: newTime });
+      if (res.data) {
+        await fetchGuests();
+      }
     } catch (err) {
+      console.error('Error updating time:', err);
       setError(err.response?.data?.message || "Failed to update time. Please try again.");
+    }
+  };
+
+  // Export guests to CSV
+  const handleExport = () => {
+    const headers = ["Name", "Contact", "Status", "Time", "Plus One"];
+    const csvData = guests.map(guest => [
+      guest.name,
+      guest.contact,
+      guest.status,
+      guest.time,
+      guest.plusOne
+    ]);
+    
+    const csvContent = [
+      headers.join(","),
+      ...csvData.map(row => row.join(","))
+    ].join("\n");
+    
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "guests.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Send invitation
+  const handleSendInvitation = async (guest) => {
+    setError(null);
+    try {
+      const res = await axios.post(`/api/guests/${guest._id}/invite`);
+      if (res.data) {
+        alert(`Invitation sent to ${guest.name}`);
+      }
+    } catch (err) {
+      console.error('Error sending invitation:', err);
+      setError(err.response?.data?.message || "Failed to send invitation. Please try again.");
     }
   };
 
@@ -173,10 +252,13 @@ export default function Guests() {
   const declined = guestList.filter((g) => g.status === "Declined").length;
   const plusOne = guestList.reduce((sum, g) => sum + (g.plusOne || 0), 0);
 
-  // Filtered guest list based on active filter
-  const filteredGuestList = activeFilter === 'All'
-    ? guestList
-    : guestList.filter((g) => g.status === activeFilter);
+  // Filtered guest list based on active filter and search query
+  const filteredGuestList = guestList
+    .filter((g) => activeFilter === 'All' || g.status === activeFilter)
+    .filter((g) => 
+      g.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      g.contact.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   return (
     <div className="guest-page">
@@ -186,141 +268,181 @@ export default function Guests() {
           Keep track of your event attendees, send invitations, and manage RSVPs all in one place
         </p>
         <div className="guest-controls">
-          <input className="guest-search" placeholder="Search guest" />
-          <button className="guest-btn">Export</button>
-          <button className="guest-btn">Send Invitation</button>
-          <button className="guest-btn add" onClick={() => { setShowForm(true); setEditId(null); }}>Add Guest</button>
+          <div className="search-container">
+            <FaSearch className="search-icon" />
+            <input 
+              className="guest-search" 
+              placeholder="Search guest" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <button className="guest-btn" onClick={handleExport}>
+            <FaFileExport /> Export
+          </button>
+          <button className="guest-btn add" onClick={() => { setShowForm(true); setEditId(null); }}>
+            Add Guest
+          </button>
         </div>
       </div>
 
       {error && (
-        <div className="error-message" style={{ 
-          color: "red", 
-          margin: "10px 24px", 
-          padding: "10px",
-          backgroundColor: "#ffebee",
-          borderRadius: "4px",
-          border: "1px solid #ffcdd2"
-        }}>
+        <div className="error-message">
           {error}
         </div>
       )}
 
       {showForm && (
         <div className="guest-form-modal">
-          <form className="guest-form" onSubmit={handleSubmit}>
-            <input
-              placeholder="Guest Name"
-              value={form.name}
-              onChange={e => setForm({ ...form, name: e.target.value })}
-              required
-            />
-            <input
-              placeholder="WhatsApp Number"
-              value={form.contact}
-              onChange={e => setForm({ ...form, contact: e.target.value })}
-              required
-            />
-            <select
-              value={form.status}
-              onChange={e => setForm({ ...form, status: e.target.value })}
-            >
-              {STATUS_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
-            </select>
-            <select
-              value={form.time}
-              onChange={e => setForm({ ...form, time: e.target.value })}
-            >
-              {TIME_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
-            </select>
-            <input
-              type="number"
-              min="0"
-              placeholder="Plus One"
-              value={form.plusOne}
-              onChange={e => setForm({ ...form, plusOne: Number(e.target.value) })}
-            />
-            <div className="form-actions">
-              <button type="submit">{editId ? "Update" : "Add"}</button>
-              <button type="button" onClick={() => { setShowForm(false); setEditId(null); }}>Cancel</button>
-            </div>
-          </form>
+          <div className="modal-content">
+            <h2>{editId ? "Edit Guest" : "Add New Guest"}</h2>
+            <form className="guest-form" onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label>Guest Name *</label>
+                <input
+                  type="text"
+                  placeholder="Enter guest name"
+                  value={form.name}
+                  onChange={e => setForm({ ...form, name: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Contact Number *</label>
+                <input
+                  type="tel"
+                  placeholder="Enter contact number"
+                  value={form.contact}
+                  onChange={e => setForm({ ...form, contact: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Status</label>
+                <select
+                  value={form.status}
+                  onChange={e => setForm({ ...form, status: e.target.value })}
+                >
+                  {STATUS_OPTIONS.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Time</label>
+                <select
+                  value={form.time}
+                  onChange={e => setForm({ ...form, time: e.target.value })}
+                >
+                  {TIME_OPTIONS.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Plus One</label>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="Number of plus ones"
+                  value={form.plusOne}
+                  onChange={e => setForm({ ...form, plusOne: e.target.value })}
+                />
+              </div>
+              <div className="form-actions">
+                <button type="submit" className="submit-btn">
+                  {editId ? "Update Guest" : "Add Guest"}
+                </button>
+                <button 
+                  type="button" 
+                  className="cancel-btn" 
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditId(null);
+                    setForm({
+                      name: "",
+                      contact: "",
+                      status: "Pending",
+                      time: "Not responded",
+                      plusOne: 0,
+                    });
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
       <div className="guest-table-container">
         <div className="guest-table-filters">
-          <label>
-            <input type="checkbox" checked={activeFilter === 'All'} onChange={() => setActiveFilter('All')} />
-            <span>All Guest</span>
+          <label className={activeFilter === 'All' ? 'active' : ''} onClick={() => setActiveFilter('All')}>
+            <span>All</span>
           </label>
-          <label>
-            <input type="checkbox" checked={activeFilter === 'Confirmed'} onChange={() => setActiveFilter('Confirmed')} />
+          <label className={activeFilter === 'Confirmed' ? 'active' : ''} onClick={() => setActiveFilter('Confirmed')}>
             <span>Confirmed</span>
           </label>
-          <label>
-            <input type="checkbox" checked={activeFilter === 'Pending'} onChange={() => setActiveFilter('Pending')} />
+          <label className={activeFilter === 'Pending' ? 'active' : ''} onClick={() => setActiveFilter('Pending')}>
             <span>Pending</span>
           </label>
-          <label>
-            <input type="checkbox" checked={activeFilter === 'Declined'} onChange={() => setActiveFilter('Declined')} />
+          <label className={activeFilter === 'Declined' ? 'active' : ''} onClick={() => setActiveFilter('Declined')}>
             <span>Declined</span>
           </label>
         </div>
-        {loading ? (
-          <div className="loading-message" style={{ 
-            padding: "20px", 
-            textAlign: "center",
-            color: "#666"
-          }}>
-            Loading guests...
-          </div>
-        ) : (
-          <table className="guest-table">
-            <thead>
-              <tr>
-                <th>Guest</th>
-                <th>Contact</th>
-                <th>Status</th>
-                <th>Time</th>
-                <th>Plus One</th>
-                <th>Actions</th>
+
+        <table className="guest-table">
+          <thead>
+            <tr>
+              <th>Guest</th>
+              <th>Contact</th>
+              <th>Status</th>
+              <th>Time</th>
+              <th>Plus One</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredGuestList.map((guest) => (
+              <tr key={guest._id}>
+                <td>
+                  <div className="guest-avatar">{guest.name[0]}</div>
+                  {guest.name}
+                </td>
+                <td>{guest.contact}</td>
+                <td>
+                  <button 
+                    className={`status-btn ${guest.status.toLowerCase()}`}
+                    onClick={() => handleStatusToggle(guest)}
+                  >
+                    {guest.status}
+                  </button>
+                </td>
+                <td>
+                  <button 
+                    className={`status-btn ${guest.time.toLowerCase().replace(/\s+/g, '-')}`}
+                    onClick={() => handleTimeToggle(guest)}
+                  >
+                    {guest.time}
+                  </button>
+                </td>
+                <td>{guest.plusOne || 0}</td>
+                <td>
+                  <button className="action-btn" onClick={() => handleSendInvitation(guest)}>
+                    <FaEnvelope />
+                  </button>
+                  <button className="action-btn" onClick={() => handleEdit(guest)}>
+                    <FaEdit />
+                  </button>
+                  <button className="action-btn delete" onClick={() => handleDelete(guest._id)}>
+                    <FaTrash />
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {filteredGuestList.map((g) => (
-                <tr key={g._id}>
-                  <td>
-                    <span className="guest-avatar">🧑</span>
-                    {g.name}
-                  </td>
-                  <td>{g.contact}</td>
-                  <td>
-                    <button 
-                      className={`status-btn ${g.status.toLowerCase()}`} 
-                      onClick={() => handleStatusToggle(g)}
-                    >
-                      {g.status}
-                    </button>
-                  </td>
-                  <td>
-                    <button 
-                      className={`status-btn ${g.time.toLowerCase().replace(' ', '-')}`} 
-                      onClick={() => handleTimeToggle(g)}
-                    >
-                      {g.time}
-                    </button>
-                  </td>
-                  <td>{g.plusOne || 0}</td>
-                  <td>
-                    <span className="action-edit" onClick={() => handleEdit(g)}>✎</span>
-                    <span className="action-remove" onClick={() => handleDelete(g._id)}>✗</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+            ))}
+          </tbody>
+        </table>
       </div>
 
       <div className="guest-summary">

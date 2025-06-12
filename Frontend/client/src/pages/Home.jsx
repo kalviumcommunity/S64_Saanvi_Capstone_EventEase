@@ -40,8 +40,8 @@ const Home = () => {
     <div className="home-root">
       <div className="home-main">
         <div className="home-header">
-          <h2>Welcome back, {user?.name || user?.email || 'User'}</h2>
-          <button className="add-budget-btn" onClick={() => navigate("/addbudget")}>
+          <h2>Welcome back, {user?.username || user?.name || 'User'}</h2>
+          <button className="add-budget-btn" onClick={() => navigate("/budget")}>
             add budget
           </button>
         </div>
