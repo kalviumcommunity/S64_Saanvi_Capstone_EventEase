@@ -1,56 +1,9 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "../Styles/BudgetManagementPage.css";
+import { FaEdit, FaTrash, FaPlus, FaSave, FaTimes } from "react-icons/fa";
 
 const BudgetManagementPage = () => {
-  // Initial items from the image
-  const initialItems = [
-    {
-      id: 1,
-      name: "Wedding Hall",
-      category: "Venue",
-      vendor: "Dream Venue Hall",
-      estimated: 5000,
-      actual: 5200,
-      status: "Paid"
-    },
-    {
-      id: 2,
-      name: "Main Course",
-      category: "Catering",
-      vendor: "Gourmet Delights Catering",
-      estimated: 3500,
-      actual: 3500,
-      status: "pending"
-    },
-    {
-      id: 3,
-      name: "Ceremony Decorations",
-      category: "Flowers",
-      vendor: "Bloom & Petal Florists",
-      estimated: 1200,
-      actual: 1000,
-      status: "paid"
-    },
-    {
-      id: 4,
-      name: "Full-day Coverage",
-      category: "Photography",
-      vendor: "Elegance Photography",
-      estimated: 2300,
-      actual: null,
-      status: "pending"
-    },
-    {
-      id: 5,
-      name: "DJ Services",
-      category: "Entertainment",
-      vendor: "Sound Wave Entertainment",
-      estimated: 1500,
-      actual: null,
-      status: "pending"
-    }
-  ];
-
   // Category colors
   const categoryColors = {
     "Venue": "#6BAAA0",
@@ -62,23 +15,65 @@ const BudgetManagementPage = () => {
 
   // State variables
   const [totalBudget, setTotalBudget] = useState(15000);
-  const [budgetItems, setBudgetItems] = useState(initialItems);
+  const [budgetItems, setBudgetItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("All");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
   const [newItem, setNewItem] = useState({
     category: "",
-    name: "",
-    estimated: "",
+    itemName: "",
+    estimatedCost: "",
     vendor: "",
-    actual: "",
-    status: "pending"
+    actualCost: "",
+    status: "Pending"
   });
-  const [isFormValid, setIsFormValid] = useState(false);
+
+  // Fetch budget items from backend
+  useEffect(() => {
+    fetchBudgetItems();
+  }, []);
+
+  const fetchBudgetItems = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get("/api/budget");
+      setBudgetItems(response.data);
+    } catch (err) {
+      console.error('Error fetching budget items:', err);
+      setError(err.response?.data?.error || "Failed to fetch budget items");
+      // Fallback to dummy data if backend fails
+      setBudgetItems([
+        {
+          _id: 1,
+          itemName: "Wedding Hall",
+          category: "Venue",
+          vendor: "Dream Venue Hall",
+          estimatedCost: 5000,
+          actualCost: 5200,
+          status: "Paid"
+        },
+        {
+          _id: 2,
+          itemName: "Main Course",
+          category: "Catering",
+          vendor: "Gourmet Delights Catering",
+          estimatedCost: 3500,
+          actualCost: 3500,
+          status: "Pending"
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Calculate spend so far and remaining budget
   const spendSoFar = budgetItems
-    .filter(item => item.actual !== null && item.actual !== "")
-    .reduce((sum, item) => sum + Number(item.actual), 0);
+    .filter(item => item.actualCost && item.actualCost > 0)
+    .reduce((sum, item) => sum + Number(item.actualCost), 0);
   
   const remainingBudget = totalBudget - spendSoFar;
 
@@ -87,10 +82,10 @@ const BudgetManagementPage = () => {
     const categories = ["Venue", "Catering", "Flowers", "Photography", "Entertainment"];
     return categories.map(category => {
       const categoryItems = budgetItems.filter(item => item.category === category);
-      const estimated = categoryItems.reduce((sum, item) => sum + Number(item.estimated || 0), 0);
+      const estimated = categoryItems.reduce((sum, item) => sum + Number(item.estimatedCost || 0), 0);
       const actual = categoryItems
-        .filter(item => item.actual !== null && item.actual !== "")
-        .reduce((sum, item) => sum + Number(item.actual || 0), 0);
+        .filter(item => item.actualCost && item.actualCost > 0)
+        .reduce((sum, item) => sum + Number(item.actualCost || 0), 0);
       
       return { category, estimated, actual };
     });
@@ -111,20 +106,6 @@ const BudgetManagementPage = () => {
     );
   };
 
-  // Validate form
-  useEffect(() => {
-    if (
-      newItem.category.trim() !== "" &&
-      newItem.name.trim() !== "" &&
-      newItem.vendor.trim() !== "" &&
-      newItem.estimated.toString().trim() !== ""
-    ) {
-      setIsFormValid(true);
-    } else {
-      setIsFormValid(false);
-    }
-  }, [newItem]);
-
   // Handle budget change
   const handleBudgetChange = (e) => {
     const value = parseFloat(e.target.value);
@@ -143,52 +124,162 @@ const BudgetManagementPage = () => {
   };
 
   // Handle add item
-  const handleAddItem = (e) => {
+  const handleAddItem = async (e) => {
     e.preventDefault();
     
-    if (!isFormValid) return;
+    // Validate form
+    if (!newItem.category || !newItem.itemName || !newItem.estimatedCost || !newItem.vendor) {
+      setError("Please fill in all required fields");
+      return;
+    }
     
-    const newBudgetItem = {
-      id: Date.now(),
-      name: newItem.name,
-      category: newItem.category,
-      vendor: newItem.vendor,
-      estimated: parseFloat(newItem.estimated),
-      actual: newItem.actual ? parseFloat(newItem.actual) : null,
-      status: newItem.status
-    };
-    
-    setBudgetItems([...budgetItems, newBudgetItem]);
-    
-    // Reset form
+    setError(null);
+    try {
+      const budgetData = {
+        category: newItem.category,
+        itemName: newItem.itemName,
+        estimatedCost: parseFloat(newItem.estimatedCost),
+        actualCost: newItem.actualCost ? parseFloat(newItem.actualCost) : 0,
+        vendor: newItem.vendor,
+        status: newItem.status
+      };
+
+      const response = await axios.post('/api/budget', budgetData);
+      setBudgetItems([response.data, ...budgetItems]);
+      
+      // Reset form
+      setNewItem({
+        category: "",
+        itemName: "",
+        estimatedCost: "",
+        vendor: "",
+        actualCost: "",
+        status: "Pending"
+      });
+      
+      setShowAddForm(false);
+      alert("Budget item added successfully!");
+    } catch (err) {
+      console.error('Error adding budget item:', err);
+      setError(err.response?.data?.error || "Failed to add budget item");
+      alert(`Error: ${err.response?.data?.error || "Failed to add budget item"}`);
+    }
+  };
+
+  // Handle edit item
+  const handleEditItem = (item) => {
+    setEditingItem(item);
     setNewItem({
-      category: "",
-      name: "",
-      estimated: "",
-      vendor: "",
-      actual: "",
-      status: "pending"
+      category: item.category,
+      itemName: item.itemName,
+      estimatedCost: item.estimatedCost.toString(),
+      vendor: item.vendor,
+      actualCost: item.actualCost ? item.actualCost.toString() : "",
+      status: item.status
     });
+    setShowAddForm(true);
+  };
+
+  // Handle update item
+  const handleUpdateItem = async (e) => {
+    e.preventDefault();
     
-    setShowAddForm(false);
+    if (!editingItem) return;
+    
+    // Validate form
+    if (!newItem.category || !newItem.itemName || !newItem.estimatedCost || !newItem.vendor) {
+      setError("Please fill in all required fields");
+      return;
+    }
+    
+    setError(null);
+    try {
+      const budgetData = {
+        category: newItem.category,
+        itemName: newItem.itemName,
+        estimatedCost: parseFloat(newItem.estimatedCost),
+        actualCost: newItem.actualCost ? parseFloat(newItem.actualCost) : 0,
+        vendor: newItem.vendor,
+        status: newItem.status
+      };
+
+      const response = await axios.put(`/api/budget/${editingItem._id}`, budgetData);
+      
+      setBudgetItems(budgetItems.map(item => 
+        item._id === editingItem._id ? response.data : item
+      ));
+      
+      // Reset form
+      setNewItem({
+        category: "",
+        itemName: "",
+        estimatedCost: "",
+        vendor: "",
+        actualCost: "",
+        status: "Pending"
+      });
+      
+      setEditingItem(null);
+      setShowAddForm(false);
+      alert("Budget item updated successfully!");
+    } catch (err) {
+      console.error('Error updating budget item:', err);
+      setError(err.response?.data?.error || "Failed to update budget item");
+      alert(`Error: ${err.response?.data?.error || "Failed to update budget item"}`);
+    }
+  };
+
+  // Handle delete item
+  const handleDeleteItem = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this budget item?")) return;
+    
+    setError(null);
+    try {
+      await axios.delete(`/api/budget/${id}`);
+      setBudgetItems(budgetItems.filter(item => item._id !== id));
+      alert("Budget item deleted successfully!");
+    } catch (err) {
+      console.error('Error deleting budget item:', err);
+      setError(err.response?.data?.error || "Failed to delete budget item");
+      alert(`Error: ${err.response?.data?.error || "Failed to delete budget item"}`);
+    }
   };
 
   // Handle status toggle
-  const toggleStatus = (id) => {
-    setBudgetItems(
-      budgetItems.map(item => {
-        if (item.id === id) {
-          const newStatus = item.status.toLowerCase() === "paid" ? "pending" : "Paid";
-          return { ...item, status: newStatus };
-        }
-        return item;
-      })
-    );
+  const toggleStatus = async (item) => {
+    setError(null);
+    try {
+      const newStatus = item.status.toLowerCase() === "paid" ? "Pending" : "Paid";
+      const response = await axios.put(`/api/budget/${item._id}`, { status: newStatus });
+      
+      setBudgetItems(budgetItems.map(budgetItem => 
+        budgetItem._id === item._id ? response.data : budgetItem
+      ));
+    } catch (err) {
+      console.error('Error updating status:', err);
+      setError(err.response?.data?.error || "Failed to update status");
+      alert(`Error: ${err.response?.data?.error || "Failed to update status"}`);
+    }
   };
 
   // Calculate relative percentage for budget bar
   const calculatePercentage = (categoryAmount) => {
     return (categoryAmount / totalBudget) * 100;
+  };
+
+  // Cancel edit/add form
+  const cancelForm = () => {
+    setShowAddForm(false);
+    setEditingItem(null);
+    setNewItem({
+      category: "",
+      itemName: "",
+      estimatedCost: "",
+      vendor: "",
+      actualCost: "",
+      status: "Pending"
+    });
+    setError(null);
   };
 
   return (
@@ -198,205 +289,283 @@ const BudgetManagementPage = () => {
         <p className="page-subtitle">Keep track of your event expenses and stay within your budget.</p>
 
         <div className="budget-summary">
-          <div className="budget-card">
-            <h3>Total Budget</h3>
-            <div className="card-value-container">
-              <input 
-                type="number" 
-                className="budget-value editable" 
-                value={totalBudget}
-                onChange={handleBudgetChange}
-              />
-              <div className="budget-icon">💰</div>
+          <div className="budget-overview">
+            <div className="budget-card">
+              <h3>Total Budget</h3>
+              <div className="budget-input-container">
+                <span>$</span>
+                <input
+                  type="number"
+                  value={totalBudget}
+                  onChange={handleBudgetChange}
+                  className="budget-input"
+                />
+              </div>
             </div>
-          </div>
-          
-          <div className="budget-card">
-            <h3>Spend so far</h3>
-            <div className="card-value-container">
-              <span className="budget-value">{spendSoFar.toLocaleString()}</span>
-              <div className="budget-icon">💵</div>
+            <div className="budget-card">
+              <h3>Spent So Far</h3>
+              <p className="spent-amount">${spendSoFar.toLocaleString()}</p>
             </div>
-          </div>
-          
-          <div className="budget-card">
-            <h3>Remaining budget</h3>
-            <div className="card-value-container">
-              <span className="budget-value">{remainingBudget.toLocaleString()}</span>
-              <div className="budget-icon">💼</div>
+            <div className="budget-card">
+              <h3>Remaining</h3>
+              <p className={`remaining-amount ${remainingBudget < 0 ? 'over-budget' : ''}`}>
+                ${remainingBudget.toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="budget-content">
-          <div className="budget-breakdown">
-            <h2>Budget Breakdown</h2>
-            
-            <div className="category-bars">
-              {categoryTotals.map((cat) => (
-                <div className="category-item" key={cat.category}>
-                  <div className="category-label">{cat.category}</div>
-                  <div className="category-bar-container">
-                    <div 
-                      className="category-bar" 
-                      style={{
-                        width: `${calculatePercentage(cat.estimated)}%`,
-                        backgroundColor: categoryColors[cat.category]
-                      }}
-                    ></div>
+        <div className="budget-breakdown">
+          <h2>Budget Breakdown</h2>
+          <div className="breakdown-grid">
+            {categoryTotals.map((category) => (
+              <div key={category.category} className="breakdown-card">
+                <div className="breakdown-header">
+                  <h3>{category.category}</h3>
+                  <div 
+                    className="category-color" 
+                    style={{ backgroundColor: categoryColors[category.category] || '#999' }}
+                  ></div>
+                </div>
+                <div className="breakdown-bars">
+                  <div className="bar-container">
+                    <div className="bar-label">Estimated</div>
+                    <div className="progress-bar">
+                      <div 
+                        className="progress-fill estimated"
+                        style={{ width: `${calculatePercentage(category.estimated)}%` }}
+                      ></div>
+                    </div>
+                    <span className="bar-amount">${category.estimated.toLocaleString()}</span>
+                  </div>
+                  <div className="bar-container">
+                    <div className="bar-label">Actual</div>
+                    <div className="progress-bar">
+                      <div 
+                        className="progress-fill actual"
+                        style={{ width: `${calculatePercentage(category.actual)}%` }}
+                      ></div>
+                    </div>
+                    <span className="bar-amount">${category.actual.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="budget-items-section">
+          <div className="section-header">
+            <h2>Budget Items</h2>
+            <button 
+              className="add-item-btn"
+              onClick={() => setShowAddForm(true)}
+            >
+              <FaPlus /> Add Item
+            </button>
+          </div>
+
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
+
+          <div className="tab-buttons">
+            <button 
+              className={`tab-btn ${activeTab === "All" ? "active" : ""}`}
+              onClick={() => setActiveTab("All")}
+            >
+              All ({budgetItems.length})
+            </button>
+            <button 
+              className={`tab-btn ${activeTab === "Paid" ? "active" : ""}`}
+              onClick={() => setActiveTab("Paid")}
+            >
+              Paid ({budgetItems.filter(item => item.status === "Paid").length})
+            </button>
+            <button 
+              className={`tab-btn ${activeTab === "Pending" ? "active" : ""}`}
+              onClick={() => setActiveTab("Pending")}
+            >
+              Pending ({budgetItems.filter(item => item.status === "Pending").length})
+            </button>
+          </div>
+
+          {loading ? (
+            <div className="loading">Loading budget items...</div>
+          ) : (
+            <div className="budget-items-grid">
+              {getFilteredItems().map((item) => (
+                <div key={item._id} className="budget-item-card">
+                  <div className="item-header">
+                    <div className="item-category">
+                      <div 
+                        className="category-indicator"
+                        style={{ backgroundColor: categoryColors[item.category] || '#999' }}
+                      ></div>
+                      <span>{item.category}</span>
+                    </div>
+                    <div className="item-actions">
+                      <button 
+                        className="action-btn edit-btn"
+                        onClick={() => handleEditItem(item)}
+                        title="Edit"
+                      >
+                        <FaEdit />
+                      </button>
+                      <button 
+                        className="action-btn delete-btn"
+                        onClick={() => handleDeleteItem(item._id)}
+                        title="Delete"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <h3 className="item-name">{item.itemName}</h3>
+                  <p className="item-vendor">{item.vendor}</p>
+                  
+                  <div className="item-costs">
+                    <div className="cost-row">
+                      <span>Estimated:</span>
+                      <span className="estimated-cost">${item.estimatedCost.toLocaleString()}</span>
+                    </div>
+                    <div className="cost-row">
+                      <span>Actual:</span>
+                      <span className="actual-cost">
+                        {item.actualCost ? `$${item.actualCost.toLocaleString()}` : "Not set"}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="item-status">
+                    <button 
+                      className={`status-btn ${item.status.toLowerCase()}`}
+                      onClick={() => toggleStatus(item)}
+                    >
+                      {item.status}
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
-            
-            <div className="breakdown-summary">
-              <div className="breakdown-row">
-                <div className="breakdown-label">Estimated</div>
-                <div className="breakdown-value">{estimatedTotal.toLocaleString()}</div>
-              </div>
-              <div className="breakdown-row">
-                <div className="breakdown-label">Actual</div>
-                <div className="breakdown-value">{actualTotal.toLocaleString()}</div>
-              </div>
-              <div className="breakdown-row">
-                <div className="breakdown-label">Difference</div>
-                <div className="breakdown-value">{difference.toLocaleString()}</div>
-              </div>
-            </div>
-          </div>
+          )}
 
-          <div className="budget-items">
-            <div className="budget-items-header">
-              <h2>Budget Items</h2>
-              <button 
-                className="add-button" 
-                onClick={() => setShowAddForm(!showAddForm)}
-              >
-                + Add Item
-              </button>
-              <div className="tabs">
-                <button 
-                  className={activeTab === "All" ? "tab-active" : ""} 
-                  onClick={() => setActiveTab("All")}
-                >
-                  All
-                </button>
-                <button 
-                  className={activeTab === "Paid" ? "tab-active" : ""} 
-                  onClick={() => setActiveTab("Paid")}
-                >
-                  Paid
-                </button>
-                <button 
-                  className={activeTab === "pending" ? "tab-active" : ""} 
-                  onClick={() => setActiveTab("pending")}
-                >
-                  Pending
+          {getFilteredItems().length === 0 && !loading && (
+            <div className="no-items">
+              <p>No budget items found. Add your first item to get started!</p>
+            </div>
+          )}
+        </div>
+
+        {/* Add/Edit Form Modal */}
+        {showAddForm && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h2>{editingItem ? "Edit Budget Item" : "Add Budget Item"}</h2>
+                <button className="close-btn" onClick={cancelForm}>
+                  <FaTimes />
                 </button>
               </div>
-            </div>
-
-            {showAddForm && (
-              <form className="add-item-form" onSubmit={handleAddItem}>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Category</label>
-                    <input
-                      type="text"
-                      name="category"
-                      value={newItem.category}
-                      onChange={handleInputChange}
-                      placeholder="Category"
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Item Name</label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={newItem.name}
-                      onChange={handleInputChange}
-                      placeholder="Item Name"
-                      required
-                    />
-                  </div>
+              
+              <form onSubmit={editingItem ? handleUpdateItem : handleAddItem}>
+                <div className="form-group">
+                  <label>Category *</label>
+                  <select 
+                    name="category" 
+                    value={newItem.category} 
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    <option value="Venue">Venue</option>
+                    <option value="Catering">Catering</option>
+                    <option value="Flowers">Flowers</option>
+                    <option value="Photography">Photography</option>
+                    <option value="Entertainment">Entertainment</option>
+                  </select>
                 </div>
+                
+                <div className="form-group">
+                  <label>Item Name *</label>
+                  <input
+                    type="text"
+                    name="itemName"
+                    value={newItem.itemName}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Wedding Hall, Main Course"
+                    required
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Vendor *</label>
+                  <input
+                    type="text"
+                    name="vendor"
+                    value={newItem.vendor}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Dream Venue Hall"
+                    required
+                  />
+                </div>
+                
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Estimated Cost</label>
+                    <label>Estimated Cost *</label>
                     <input
                       type="number"
-                      name="estimated"
-                      value={newItem.estimated}
+                      name="estimatedCost"
+                      value={newItem.estimatedCost}
                       onChange={handleInputChange}
-                      placeholder="Estimated Cost"
+                      placeholder="0"
                       min="0"
+                      step="0.01"
                       required
                     />
                   </div>
+                  
                   <div className="form-group">
-                    <label>Vendor</label>
+                    <label>Actual Cost</label>
                     <input
-                      type="text"
-                      name="vendor"
-                      value={newItem.vendor}
+                      type="number"
+                      name="actualCost"
+                      value={newItem.actualCost}
                       onChange={handleInputChange}
-                      placeholder="Vendor"
-                      required
+                      placeholder="0"
+                      min="0"
+                      step="0.01"
                     />
                   </div>
                 </div>
+                
+                <div className="form-group">
+                  <label>Status</label>
+                  <select 
+                    name="status" 
+                    value={newItem.status} 
+                    onChange={handleInputChange}
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Paid">Paid</option>
+                  </select>
+                </div>
+                
                 <div className="form-actions">
-                  <button 
-                    type="button" 
-                    className="cancel-button"
-                    onClick={() => setShowAddForm(false)}
-                  >
-                    cancel
+                  <button type="button" className="cancel-btn" onClick={cancelForm}>
+                    Cancel
                   </button>
-                  <button 
-                    type="submit" 
-                    className="submit-button" 
-                    disabled={!isFormValid}
-                  >
-                    Add item
+                  <button type="submit" className="save-btn">
+                    {editingItem ? <><FaSave /> Update</> : <><FaPlus /> Add</>}
                   </button>
                 </div>
               </form>
-            )}
-
-            <table className="budget-table">
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Vendor</th>
-                  <th>Estimated</th>
-                  <th>Actual</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {getFilteredItems().map((item) => (
-                  <tr key={item.id} onClick={() => toggleStatus(item.id)}>
-                    <td className="item-name-col">
-                      <div className="item-name">{item.name}</div>
-                      <div className="item-category">{item.category}</div>
-                    </td>
-                    <td>{item.vendor}</td>
-                    <td>${item.estimated.toLocaleString()}</td>
-                    <td>{item.actual ? `$${item.actual.toLocaleString()}` : "-"}</td>
-                    <td>
-                      <span className={`status-badge ${item.status.toLowerCase()}`}>
-                        {item.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   );

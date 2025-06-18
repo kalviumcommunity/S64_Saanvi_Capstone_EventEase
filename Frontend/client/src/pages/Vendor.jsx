@@ -1,5 +1,5 @@
-
 import { useState, useEffect } from 'react';
+import '../Styles/Vendor.css';
 
 const styles = {
   container: {
@@ -662,26 +662,24 @@ export default function EventEaseMarketplace() {
   // Render loading state
   if (loading && !isGettingLocation) {
     return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.loadingSpinner}></div>
-        <span style={styles.loadingText}>Loading vendors...</span>
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <span className="loading-text">Loading vendors...</span>
       </div>
     );
   }
 
   // Main render
   return (
-    <div style={styles.container}>
-      {/* Header */}
-      <header style={styles.header}>
-        <h1 style={styles.headerTitle}>EventEase Marketplace</h1>
+    <div className="vendor-container">
+      <header className="vendor-header">
+        <h1>EventEase Marketplace</h1>
       </header>
 
-      {/* Main Content */}
-      <main style={styles.main}>
+      <main className="vendor-main">
         {/* Error Message */}
         {error && (
-          <div style={styles.errorMessage}>
+          <div className="error-message">
             <span>⚠️</span>
             <div>
               <p><strong>Error:</strong> {error}</p>
@@ -690,187 +688,154 @@ export default function EventEaseMarketplace() {
           </div>
         )}
 
-        {/* Location Section */}
-        <section style={styles.locationSection}>
-          <h2 style={styles.locationTitle}>Select Location</h2>
-          <div style={styles.locationOptions}>
-            <button 
-              style={styles.locationButton(locationType === 'auto')}
-              onClick={fetchUserLocation}
-              disabled={isGettingLocation}
-            >
-              <span>📍</span>
-              {isGettingLocation ? 'Getting your location...' : 'Use current location'}
-            </button>
+        <aside className="vendor-sidebar">
+          <h2 className="categories-title">Categories</h2>
+          <ul className="category-list">
+            {categories.map((category) => (
+              <li key={category.id} className="category-item">
+                <button
+                  className={`category-button ${selectedCategory === category.name ? 'active' : ''}`}
+                  onClick={() => handleCategorySelect(category.name)}
+                  data-category={category.name}
+                >
+                  {category.name}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </aside>
 
-            <button 
-              style={styles.locationButton(locationType === 'manual')}
-              onClick={() => setLocationType('manual')}
-            >
-              <span>🔍</span>
-              Enter city manually
-            </button>
+        <div className="vendor-content">
+          <section className="location-section">
+            <h2 className="location-title">Set Your Location</h2>
+            <div className="location-options">
+              <button
+                className={`location-button ${locationType === 'current' ? 'active' : ''}`}
+                onClick={() => setLocationType('current')}
+              >
+                <span>Use Current Location</span>
+              </button>
+              <button
+                className={`location-button ${locationType === 'custom' ? 'active' : ''}`}
+                onClick={() => setLocationType('custom')}
+              >
+                <span>Enter Custom Location</span>
+              </button>
+            </div>
 
-            {locationType === 'manual' && (
-              <form onSubmit={handleLocationSubmit} style={styles.locationInputGroup}>
-                <div style={styles.inputRow}>
+            {locationType === 'custom' && (
+              <div className="location-input-group">
+                <div className="input-row">
                   <input
                     type="text"
+                    className="location-input"
                     placeholder="City"
                     value={manualLocation.city}
-                    onChange={(e) => setManualLocation({...manualLocation, city: e.target.value})}
-                    style={styles.input}
-                    required
+                    onChange={(e) => setManualLocation({ ...manualLocation, city: e.target.value })}
                   />
                   <input
                     type="text"
-                    placeholder="State/Province"
+                    className="location-input"
+                    placeholder="State"
                     value={manualLocation.state}
-                    onChange={(e) => setManualLocation({...manualLocation, state: e.target.value})}
-                    style={styles.input}
+                    onChange={(e) => setManualLocation({ ...manualLocation, state: e.target.value })}
                   />
                 </div>
-                <div style={styles.inputRow}>
-                  <input
-                    type="text"
-                    placeholder="Latitude (optional)"
-                    value={manualCoordinates.lat}
-                    onChange={(e) => setManualCoordinates({...manualCoordinates, lat: e.target.value})}
-                    style={styles.input}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Longitude (optional)"
-                    value={manualCoordinates.lng}
-                    onChange={(e) => setManualCoordinates({...manualCoordinates, lng: e.target.value})}
-                    style={styles.input}
-                  />
-                </div>
-                <button type="submit" style={styles.applyButton}>Apply Location</button>
-              </form>
+                <button className="apply-button" onClick={handleLocationSubmit}>
+                  Apply Location
+                </button>
+              </div>
             )}
-          </div>
-        </section>
+          </section>
 
-        {/* Featured Vendors Section */}
-        {featuredVendors.length > 0 && (
-          <section style={styles.featuredSection}>
-            <h2 style={styles.sectionTitle}>
-              Featured Vendors
-              <div style={styles.titleDecoration}></div>
-            </h2>
-            <div style={styles.featuredContainer}>
-              {featuredVendors.map(vendor => (
-                <div key={vendor.id} style={styles.featuredCard}>
-                  <img
-                    src={vendor.imageUrl || '/api/placeholder/400/200'}
-                    alt={vendor.name}
-                    style={styles.featuredImage}
-                  />
-                  <div style={styles.featuredContent}>
-                    <span style={styles.featuredBadge}>Featured</span>
-                    <h3 style={styles.vendorName}>{vendor.name}</h3>
-                    <div style={styles.vendorCategory}>
+          <section className="featured-section">
+            <h2 className="section-title">Featured Vendors</h2>
+            <div className="featured-grid">
+              {featuredVendors.map((vendor) => (
+                <div key={vendor.id} className="vendor-card">
+                  <img src={vendor.imageUrl || '/api/placeholder/400/200'} alt={vendor.name} className="vendor-image" />
+                  <div className="vendor-content">
+                    <span className="vendor-badge">Featured</span>
+                    <h3 className="vendor-name">{vendor.name}</h3>
+                    <div className="vendor-category">
                       <span>{categoryIcons[vendor.category] || '🏢'}</span>
                       <span>{vendor.category}</span>
                     </div>
-                    <div style={styles.infoRow}>
-                      <div style={styles.ratingReviews}>
-                        <div style={styles.rating}>
+                    <div className="vendor-info">
+                      <div className="rating">
+                        <span>⭐</span>
+                        <span>{vendor.rating}</span>
+                      </div>
+                      <span className="reviews">({vendor.reviews} reviews)</span>
+                    </div>
+                    <div className="info-row">
+                      <div className="rating-reviews">
+                        <div className="rating">
                           <span>⭐</span>
                           <span>{vendor.rating}</span>
                         </div>
-                        <span style={styles.reviews}>({vendor.reviews} reviews)</span>
+                        <span className="reviews">({vendor.reviews} reviews)</span>
                       </div>
-                      <div style={styles.location}>
+                      <div className="location">
                         <span>📍</span>
-                        <span style={styles.locationText}>{vendor.location}</span>
+                        <span className="location-text">{vendor.location}</span>
                       </div>
                     </div>
-                    <button style={styles.viewButton}>View Details ({vendor.price})</button>
+                    <button className="view-button">View Details ({vendor.price})</button>
                   </div>
                 </div>
               ))}
             </div>
           </section>
-        )}
 
-        {/* Main content with sidebar and vendors grid */}
-        <div style={styles.contentLayout}>
-          {/* Sidebar with categories */}
-          <aside style={styles.sidebar}>
-            <div style={styles.categoriesBox}>
-              <h3 style={styles.categoriesTitle}>Categories</h3>
-              <ul style={styles.categoryList}>
-                {categories.map(category => (
-                  <li key={category.name} style={styles.categoryItem}>
-                    <button
-                      style={styles.categoryButton(selectedCategory === category.name)}
-                      onClick={() => handleCategorySelect(category.name)}
-                    >
-                      <span>
-                        {categoryIcons[category.name] || '🏢'} {category.name}
-                      </span>
-                      <span style={styles.categoryCount(selectedCategory === category.name)}>
-                        {category.count}
-                      </span>
-                    </button>
-                  </li>
+          <section className="vendors-section">
+            <h2 className="vendors-title">
+              {selectedCategory === 'All' ? 'All Vendors' : selectedCategory}
+              {selectedCategory !== 'All' && ` (${filteredVendors.length})`}
+            </h2>
+
+            {filteredVendors.length === 0 ? (
+              <div className="no-results">
+                <h3>No vendors found in this category</h3>
+                <p>Try selecting a different category or changing your location.</p>
+              </div>
+            ) : (
+              <div className="vendors-grid">
+                {filteredVendors.map(vendor => (
+                  <div key={vendor.id} className="vendor-card">
+                    <img
+                      src={vendor.imageUrl || '/api/placeholder/300/150'}
+                      alt={vendor.name}
+                      className="vendor-image"
+                    />
+                    <div className="vendor-content">
+                      <div className="vendor-info">
+                        <h3 className="vendor-name">{vendor.name}</h3>
+                        <div className="vendor-category">
+                          <span>{categoryIcons[vendor.category] || '🏢'}</span>
+                          <span>{vendor.category}</span>
+                        </div>
+                      </div>
+
+                      <div className="vendor-rating-row">
+                        <div className="rating-stars">
+                          <span>⭐</span>
+                          <span>{vendor.rating}</span>
+                          <span className="reviews">({vendor.reviews})</span>
+                        </div>
+                        <div className="location">
+                          <span>📍</span>
+                          <span className="location-text">{vendor.location}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </ul>
-            </div>
-          </aside>
-
-          {/* Vendors grid section */}
-          {/* Vendors grid section */}
-<section style={styles.vendorsSection}>
-  <h2 style={styles.vendorsTitle}>
-    {selectedCategory === 'All' ? 'All Vendors' : selectedCategory}
-    {selectedCategory !== 'All' && ` (${filteredVendors.length})`}
-  </h2>
-
-  {filteredVendors.length === 0 ? (
-    <div style={styles.noResults}>
-      <h3>No vendors found in this category</h3>
-      <p>Try selecting a different category or changing your location.</p>
-    </div>
-  ) : (
-    <div style={styles.vendorsGrid}>
-      {filteredVendors.map(vendor => (
-        <div key={vendor.id} style={styles.vendorCard}>
-          <img
-            src={vendor.imageUrl || '/api/placeholder/300/150'}
-            alt={vendor.name}
-            style={styles.vendorImage}
-          />
-          <div style={styles.vendorContent}>
-            <div style={styles.vendorInfo}>
-              <h3 style={styles.vendorName}>{vendor.name}</h3>
-              <div style={styles.vendorCategory}>
-                <span>{categoryIcons[vendor.category] || '🏢'}</span>
-                <span>{vendor.category}</span>
               </div>
-            </div>
-
-            <div style={styles.vendorRatingRow}>
-              <div style={styles.ratingStars}>
-                <span>⭐</span>
-                <span>{vendor.rating}</span>
-                <span style={styles.reviews}>({vendor.reviews})</span>
-              </div>
-              <div style={styles.location}>
-                <span>📍</span>
-                <span style={styles.locationText}>{vendor.location}</span>
-              </div>
-            </div>
-          </div>
+            )}
+          </section>
         </div>
-      ))}
+      </main>
     </div>
-  )}
-</section>
-</div>
-</main>
-</div>
   );
 }
