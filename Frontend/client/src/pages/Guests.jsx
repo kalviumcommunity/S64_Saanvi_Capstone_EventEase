@@ -27,58 +27,23 @@ export default function Guests() {
     fetchGuests();
   }, []);
 
-  // Dummy data for fallback
-  const dummyGuests = [
-    {
-      _id: "1",
-      name: "Alice Johnson",
-      contact: "+1 555-1234",
-      status: "Confirmed",
-      time: "On time",
-      plusOne: 1,
-    },
-    {
-      _id: "2",
-      name: "Bob Smith",
-      contact: "+1 555-5678",
-      status: "Pending",
-      time: "Not responded",
-      plusOne: 0,
-    },
-    {
-      _id: "3",
-      name: "Charlie Lee",
-      contact: "+1 555-8765",
-      status: "Declined",
-      time: "A little late",
-      plusOne: 0,
-    },
-    {
-      _id: "4",
-      name: "Diana Prince",
-      contact: "+1 555-4321",
-      status: "Confirmed",
-      time: "On time",
-      plusOne: 2,
-    },
-  ];
-
   const fetchGuests = async () => {
     setLoading(true);
     setError(null);
     try {
       const res = await axios.get("/api/guests");
-      if (Array.isArray(res.data) && res.data.length > 0) {
+      if (Array.isArray(res.data)) {
         setGuests(res.data);
-      } else if (Array.isArray(res.data.guests) && res.data.guests.length > 0) {
+      } else if (Array.isArray(res.data.guests)) {
         setGuests(res.data.guests);
       } else {
-        setGuests(dummyGuests); // fallback to dummy data
+        setGuests([]);
+        setError("No guests found");
       }
     } catch (err) {
       console.error('Error fetching guests:', err);
-      setError(err.response?.data?.message || "Failed to fetch guests. Showing sample data.");
-      setGuests(dummyGuests); // fallback to dummy data
+      setError(err.response?.data?.message || "Failed to fetch guests");
+      setGuests([]);
     } finally {
       setLoading(false);
     }
@@ -153,10 +118,12 @@ export default function Guests() {
       const res = await axios.delete(`/api/guests/${id}`);
       if (res.data) {
         await fetchGuests();
+        alert("Guest deleted successfully!");
       }
     } catch (err) {
       console.error('Error deleting guest:', err);
       setError(err.response?.data?.message || "Failed to delete guest. Please try again.");
+      alert(`Error: ${err.response?.data?.message || "Failed to delete guest"}`);
     }
   };
 
@@ -186,6 +153,7 @@ export default function Guests() {
     } catch (err) {
       console.error('Error updating status:', err);
       setError(err.response?.data?.message || "Failed to update status. Please try again.");
+      alert(`Error: ${err.response?.data?.message || "Failed to update status"}`);
     }
   };
 
@@ -202,11 +170,17 @@ export default function Guests() {
     } catch (err) {
       console.error('Error updating time:', err);
       setError(err.response?.data?.message || "Failed to update time. Please try again.");
+      alert(`Error: ${err.response?.data?.message || "Failed to update time"}`);
     }
   };
 
   // Export guests to CSV
   const handleExport = () => {
+    if (guests.length === 0) {
+      alert("No guests to export!");
+      return;
+    }
+
     const headers = ["Name", "Contact", "Status", "Time", "Plus One"];
     const csvData = guests.map(guest => [
       guest.name,
@@ -242,132 +216,230 @@ export default function Guests() {
     } catch (err) {
       console.error('Error sending invitation:', err);
       setError(err.response?.data?.message || "Failed to send invitation. Please try again.");
+      alert(`Error: ${err.response?.data?.message || "Failed to send invitation"}`);
     }
   };
 
-  // Defensive: Only operate on guests if it's an array
-  const guestList = Array.isArray(guests) ? guests : [];
-  const confirmed = guestList.filter((g) => g.status === "Confirmed").length;
-  const pending = guestList.filter((g) => g.status === "Pending").length;
-  const declined = guestList.filter((g) => g.status === "Declined").length;
-  const plusOne = guestList.reduce((sum, g) => sum + (g.plusOne || 0), 0);
+  // Filter guests based on search query and active filter
+  const filteredGuests = guests.filter(guest => {
+    const matchesSearch = guest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         guest.contact.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = activeFilter === 'All' || guest.status === activeFilter;
+    return matchesSearch && matchesFilter;
+  });
 
-  // Filtered guest list based on active filter and search query
-  const filteredGuestList = guestList
-    .filter((g) => activeFilter === 'All' || g.status === activeFilter)
-    .filter((g) => 
-      g.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      g.contact.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+  // Calculate statistics
+  const totalGuests = guests.length;
+  const confirmed = guests.filter(g => g.status === "Confirmed").length;
+  const pending = guests.filter(g => g.status === "Pending").length;
+  const declined = guests.filter(g => g.status === "Declined").length;
+  const totalPlusOnes = guests.reduce((sum, guest) => sum + (guest.plusOne || 0), 0);
+
+  if (loading) {
+    return <div className="loading">Loading guests...</div>;
+  }
 
   return (
     <div className="guest-page">
       <div className="guest-header">
-        <h1>GUEST MANAGEMENT</h1>
-        <p>
-          Keep track of your event attendees, send invitations, and manage RSVPs all in one place
-        </p>
-        <div className="guest-controls">
-          <div className="search-container">
-            <FaSearch className="search-icon" />
-            <input 
-              className="guest-search" 
-              placeholder="Search guest" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <button className="guest-btn" onClick={handleExport}>
-            <FaFileExport /> Export
-          </button>
-          <button className="guest-btn add" onClick={() => { setShowForm(true); setEditId(null); }}>
+        <h1>Guest Management</h1>
+        <div className="guest-actions">
+          <button className="add-guest-btn" onClick={() => setShowForm(true)}>
             Add Guest
+          </button>
+          <button className="export-btn" onClick={handleExport}>
+            <FaFileExport /> Export
           </button>
         </div>
       </div>
 
-      {error && (
-        <div className="error-message">
-          {error}
+      {error && <div className="error-message">{error}</div>}
+
+      <div className="guest-stats">
+        <div className="stat-card">
+          <h3>Total Guests</h3>
+          <p>{totalGuests}</p>
         </div>
-      )}
+        <div className="stat-card">
+          <h3>Confirmed</h3>
+          <p>{confirmed}</p>
+        </div>
+        <div className="stat-card">
+          <h3>Pending</h3>
+          <p>{pending}</p>
+        </div>
+        <div className="stat-card">
+          <h3>Declined</h3>
+          <p>{declined}</p>
+        </div>
+        <div className="stat-card">
+          <h3>Plus Ones</h3>
+          <p>{totalPlusOnes}</p>
+        </div>
+      </div>
+
+      <div className="guest-filters">
+        <div className="search-box">
+          <FaSearch />
+          <input
+            type="text"
+            placeholder="Search guests..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="filter-buttons">
+          <button
+            className={activeFilter === 'All' ? 'active' : ''}
+            onClick={() => setActiveFilter('All')}
+          >
+            All
+          </button>
+          <button
+            className={activeFilter === 'Confirmed' ? 'active' : ''}
+            onClick={() => setActiveFilter('Confirmed')}
+          >
+            Confirmed
+          </button>
+          <button
+            className={activeFilter === 'Pending' ? 'active' : ''}
+            onClick={() => setActiveFilter('Pending')}
+          >
+            Pending
+          </button>
+          <button
+            className={activeFilter === 'Declined' ? 'active' : ''}
+            onClick={() => setActiveFilter('Declined')}
+          >
+            Declined
+          </button>
+        </div>
+      </div>
+
+      <div className="guest-list">
+        {filteredGuests.length === 0 ? (
+          <div className="no-guests">No guests found</div>
+        ) : (
+          filteredGuests.map((guest) => (
+            <div key={guest._id} className="guest-card">
+              <div className="guest-info">
+                <h3>{guest.name}</h3>
+                <p>{guest.contact}</p>
+                <p>Plus One: {guest.plusOne || 0}</p>
+              </div>
+              <div className="guest-status">
+                <button
+                  className={`status-btn ${guest.status.toLowerCase()}`}
+                  onClick={() => handleStatusToggle(guest)}
+                >
+                  {guest.status}
+                </button>
+                <button
+                  className={`time-btn ${guest.time.toLowerCase().replace(' ', '-')}`}
+                  onClick={() => handleTimeToggle(guest)}
+                >
+                  {guest.time}
+                </button>
+              </div>
+              <div className="guest-actions">
+                <button
+                  className="invite-btn"
+                  onClick={() => handleSendInvitation(guest)}
+                  title="Send Invitation"
+                >
+                  <FaEnvelope />
+                </button>
+                <button
+                  className="edit-btn"
+                  onClick={() => handleEdit(guest)}
+                  title="Edit Guest"
+                >
+                  <FaEdit />
+                </button>
+                <button
+                  className="delete-btn"
+                  onClick={() => handleDelete(guest._id)}
+                  title="Delete Guest"
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
 
       {showForm && (
-        <div className="guest-form-modal">
+        <div className="modal">
           <div className="modal-content">
             <h2>{editId ? "Edit Guest" : "Add New Guest"}</h2>
-            <form className="guest-form" onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label>Guest Name *</label>
+                <label>Name:</label>
                 <input
                   type="text"
-                  placeholder="Enter guest name"
                   value={form.name}
-                  onChange={e => setForm({ ...form, name: e.target.value })}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
                   required
                 />
               </div>
               <div className="form-group">
-                <label>Contact Number *</label>
+                <label>Contact:</label>
                 <input
                   type="tel"
-                  placeholder="Enter contact number"
                   value={form.contact}
-                  onChange={e => setForm({ ...form, contact: e.target.value })}
+                  onChange={(e) => setForm({ ...form, contact: e.target.value })}
                   required
                 />
               </div>
               <div className="form-group">
-                <label>Status</label>
+                <label>Status:</label>
                 <select
                   value={form.status}
-                  onChange={e => setForm({ ...form, status: e.target.value })}
+                  onChange={(e) => setForm({ ...form, status: e.target.value })}
                 >
-                  {STATUS_OPTIONS.map(opt => (
-                    <option key={opt} value={opt}>{opt}</option>
+                  {STATUS_OPTIONS.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
                   ))}
                 </select>
               </div>
               <div className="form-group">
-                <label>Time</label>
+                <label>Time:</label>
                 <select
                   value={form.time}
-                  onChange={e => setForm({ ...form, time: e.target.value })}
+                  onChange={(e) => setForm({ ...form, time: e.target.value })}
                 >
-                  {TIME_OPTIONS.map(opt => (
-                    <option key={opt} value={opt}>{opt}</option>
+                  {TIME_OPTIONS.map((time) => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
                   ))}
                 </select>
               </div>
               <div className="form-group">
-                <label>Plus One</label>
+                <label>Plus One:</label>
                 <input
                   type="number"
                   min="0"
-                  placeholder="Number of plus ones"
                   value={form.plusOne}
-                  onChange={e => setForm({ ...form, plusOne: e.target.value })}
+                  onChange={(e) => setForm({ ...form, plusOne: e.target.value })}
                 />
               </div>
               <div className="form-actions">
-                <button type="submit" className="submit-btn">
-                  {editId ? "Update Guest" : "Add Guest"}
-                </button>
-                <button 
-                  type="button" 
-                  className="cancel-btn" 
-                  onClick={() => {
-                    setShowForm(false);
-                    setEditId(null);
-                    setForm({
-                      name: "",
-                      contact: "",
-                      status: "Pending",
-                      time: "Not responded",
-                      plusOne: 0,
-                    });
-                  }}
-                >
+                <button type="submit">{editId ? "Update" : "Add"} Guest</button>
+                <button type="button" onClick={() => {
+                  setShowForm(false);
+                  setEditId(null);
+                  setForm({
+                    name: "",
+                    contact: "",
+                    status: "Pending",
+                    time: "Not responded",
+                    plusOne: 0,
+                  });
+                }}>
                   Cancel
                 </button>
               </div>
@@ -375,98 +447,6 @@ export default function Guests() {
           </div>
         </div>
       )}
-
-      <div className="guest-table-container">
-        <div className="guest-table-filters">
-          <label className={activeFilter === 'All' ? 'active' : ''} onClick={() => setActiveFilter('All')}>
-            <span>All</span>
-          </label>
-          <label className={activeFilter === 'Confirmed' ? 'active' : ''} onClick={() => setActiveFilter('Confirmed')}>
-            <span>Confirmed</span>
-          </label>
-          <label className={activeFilter === 'Pending' ? 'active' : ''} onClick={() => setActiveFilter('Pending')}>
-            <span>Pending</span>
-          </label>
-          <label className={activeFilter === 'Declined' ? 'active' : ''} onClick={() => setActiveFilter('Declined')}>
-            <span>Declined</span>
-          </label>
-        </div>
-
-        <table className="guest-table">
-          <thead>
-            <tr>
-              <th>Guest</th>
-              <th>Contact</th>
-              <th>Status</th>
-              <th>Time</th>
-              <th>Plus One</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredGuestList.map((guest) => (
-              <tr key={guest._id}>
-                <td>
-                  <div className="guest-avatar">{guest.name[0]}</div>
-                  {guest.name}
-                </td>
-                <td>{guest.contact}</td>
-                <td>
-                  <button 
-                    className={`status-btn ${guest.status.toLowerCase()}`}
-                    onClick={() => handleStatusToggle(guest)}
-                  >
-                    {guest.status}
-                  </button>
-                </td>
-                <td>
-                  <button 
-                    className={`status-btn ${guest.time.toLowerCase().replace(/\s+/g, '-')}`}
-                    onClick={() => handleTimeToggle(guest)}
-                  >
-                    {guest.time}
-                  </button>
-                </td>
-                <td>{guest.plusOne || 0}</td>
-                <td>
-                  <button className="action-btn" onClick={() => handleSendInvitation(guest)}>
-                    <FaEnvelope />
-                  </button>
-                  <button className="action-btn" onClick={() => handleEdit(guest)}>
-                    <FaEdit />
-                  </button>
-                  <button className="action-btn delete" onClick={() => handleDelete(guest._id)}>
-                    <FaTrash />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="guest-summary">
-        <h2>GUEST SUMMARY</h2>
-        <div className="summary-desc">Overview of your guest list status</div>
-        <div className="summary-boxes">
-          <div className="summary-box confirmed">
-            <div>Confirmed</div>
-            <div>{confirmed}</div>
-          </div>
-          <div className="summary-box pending">
-            <div>Pending</div>
-            <div>{pending}</div>
-          </div>
-          <div className="summary-box declined">
-            <div>Declined</div>
-            <div>{declined}</div>
-          </div>
-          <div className="summary-box plus-one">
-            <div>Plus One</div>
-            <div>{plusOne}</div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
