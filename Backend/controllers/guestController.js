@@ -15,7 +15,7 @@ exports.getGuests = async (req, res) => {
   }
 };
 
-// Add a guest
+// Add a guest assssssssss
 exports.addGuest = async (req, res) => {
   try {
     const { name, contact, status, time, plusOne } = req.body;
