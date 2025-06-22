@@ -95,5 +95,5 @@ EventEase is a web-based event planning platform designed to simplify and stream
 - Submit the project for evaluation.
 - Share deployment links and documentation with the mentor.
 
-backend Deployed Link = https://s64-saanvi-capstone-eventease-8.onrender.com
+backend Deployed Link = https://eventease-event-manangement.onrender.com/
 Frontend deployed link = https://capstone-eventease.netlify.app/
