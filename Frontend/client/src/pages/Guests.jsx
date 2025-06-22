@@ -1,10 +1,26 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../Styles/Guest.css";
-import { FaSearch, FaFileExport, FaEnvelope, FaEdit, FaTrash, FaCheck, FaClock, FaTimes } from "react-icons/fa";
+import { FaSearch, FaFileExport, FaEnvelope, FaEdit, FaTrash, FaCheck, FaClock, FaTimes, FaPlus } from "react-icons/fa";
 
 const STATUS_OPTIONS = ["Confirmed", "Pending", "Declined"];
 const TIME_OPTIONS = ["On time", "A little late", "Not responded"];
+
+function getAvatarColor(name) {
+  // Simple hash for color
+  const colors = ["#f9b4ab", "#f7d08a", "#b4e7d9", "#b5b9f7", "#f7b5e6"];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
+  return colors[hash % colors.length];
+}
+
+function getInitials(name) {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
+}
 
 export default function Guests() {
   const [guests, setGuests] = useState([]);
@@ -20,7 +36,7 @@ export default function Guests() {
     plusOne: 0,
   });
   const [editId, setEditId] = useState(null);
-  const [activeFilter, setActiveFilter] = useState('All');
+  const [activeFilter, setActiveFilter] = useState("All");
 
   // Fetch guests from backend
   useEffect(() => {
@@ -140,40 +156,6 @@ export default function Guests() {
     setShowForm(true);
   };
 
-  // Toggle status
-  const handleStatusToggle = async (guest) => {
-    setError(null);
-    const idx = STATUS_OPTIONS.indexOf(guest.status);
-    const newStatus = STATUS_OPTIONS[(idx + 1) % STATUS_OPTIONS.length];
-    try {
-      const res = await axios.put(`/api/guests/${guest._id}`, { status: newStatus });
-      if (res.data) {
-        await fetchGuests();
-      }
-    } catch (err) {
-      console.error('Error updating status:', err);
-      setError(err.response?.data?.message || "Failed to update status. Please try again.");
-      alert(`Error: ${err.response?.data?.message || "Failed to update status"}`);
-    }
-  };
-
-  // Toggle time
-  const handleTimeToggle = async (guest) => {
-    setError(null);
-    const idx = TIME_OPTIONS.indexOf(guest.time);
-    const newTime = TIME_OPTIONS[(idx + 1) % TIME_OPTIONS.length];
-    try {
-      const res = await axios.put(`/api/guests/${guest._id}`, { time: newTime });
-      if (res.data) {
-        await fetchGuests();
-      }
-    } catch (err) {
-      console.error('Error updating time:', err);
-      setError(err.response?.data?.message || "Failed to update time. Please try again.");
-      alert(`Error: ${err.response?.data?.message || "Failed to update time"}`);
-    }
-  };
-
   // Export guests to CSV
   const handleExport = () => {
     if (guests.length === 0) {
@@ -240,208 +222,141 @@ export default function Guests() {
   }
 
   return (
-    <div className="guest-page">
-      <div className="guest-header">
-        <h1>Guest Management</h1>
-        <div className="guest-actions">
-          <button className="add-guest-btn" onClick={() => setShowForm(true)}>
-            Add Guest
-          </button>
-          <button className="export-btn" onClick={handleExport}>
-            <FaFileExport /> Export
-          </button>
+    <div className="guest-page" style={{ background: "#fffbe6", minHeight: "100vh", paddingBottom: 40 }}>
+      {/* Header */}
+      <div style={{ background: "#fffbe6", padding: "24px 24px 0 24px" }}>
+        <h1 style={{ fontFamily: "'Luckiest Guy', cursive, sans-serif", fontSize: "2.5rem", margin: 0, letterSpacing: 1, background: "none", color: "#222" }}>GUEST MANAGEMENT</h1>
+        <div style={{ fontSize: "1.1rem", color: "#444", margin: "8px 0 18px 0" }}>
+          Keep track of your event attendees, send invitations, and manage RSVPs all in one place
         </div>
-      </div>
-
-      {error && <div className="error-message">{error}</div>}
-
-      <div className="guest-stats">
-        <div className="stat-card">
-          <h3>Total Guests</h3>
-          <p>{totalGuests}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Confirmed</h3>
-          <p>{confirmed}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Pending</h3>
-          <p>{pending}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Declined</h3>
-          <p>{declined}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Plus Ones</h3>
-          <p>{totalPlusOnes}</p>
-        </div>
-      </div>
-
-      <div className="guest-filters">
-        <div className="search-box">
-          <FaSearch />
+        {/* Action Bar */}
+        <div style={{ display: "flex", gap: 16, marginBottom: 18, alignItems: "center" }}>
+          <div style={{ flex: 1, display: "flex", alignItems: "center", background: "#f7e3c6", borderRadius: 18, padding: "8px 18px" }}>
+            <FaSearch style={{ marginRight: 8, color: "#b76a4a" }} />
           <input
             type="text"
-            placeholder="Search guests..."
+              placeholder="Search guest"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ border: "none", background: "transparent", outline: "none", fontSize: "1rem", flex: 1 }}
           />
         </div>
-        <div className="filter-buttons">
-          <button
-            className={activeFilter === 'All' ? 'active' : ''}
-            onClick={() => setActiveFilter('All')}
-          >
-            All
+          <button className="guest-btn" style={{ background: "#f7e3c6", color: "#b76a4a", fontWeight: 600 }} onClick={handleExport}>
+            <FaFileExport style={{ marginRight: 6 }} /> Export
           </button>
-          <button
-            className={activeFilter === 'Confirmed' ? 'active' : ''}
-            onClick={() => setActiveFilter('Confirmed')}
-          >
-            Confirmed
+          <button className="guest-btn" style={{ background: "#f7e3c6", color: "#b76a4a", fontWeight: 600 }} disabled>
+            Send Invitation <span style={{ fontSize: 12, marginLeft: 2 }}>▼</span>
           </button>
-          <button
-            className={activeFilter === 'Pending' ? 'active' : ''}
-            onClick={() => setActiveFilter('Pending')}
-          >
-            Pending
-          </button>
-          <button
-            className={activeFilter === 'Declined' ? 'active' : ''}
-            onClick={() => setActiveFilter('Declined')}
-          >
-            Declined
+          <button className="guest-btn add" style={{ background: "#f7b5e6", color: "#222", fontWeight: 700 }} onClick={() => setShowForm(true)}>
+            <FaPlus style={{ marginRight: 6 }} /> Add Guest
           </button>
         </div>
       </div>
 
-      <div className="guest-list">
+      {/* Guest Table */}
+      <div style={{ background: "#fff", borderRadius: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", margin: "0 24px", padding: 0, overflow: "hidden", border: "1px solid #e3e3e3" }}>
+        <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 0, fontSize: "1rem" }}>
+          <thead style={{ background: "#f7e3c6" }}>
+            <tr>
+              <th style={{ padding: "12px 8px" }}><input type="checkbox" disabled /></th>
+              <th style={{ padding: "12px 8px", textAlign: "left" }}>Guest</th>
+              <th style={{ padding: "12px 8px", textAlign: "left" }}>Contact</th>
+              <th style={{ padding: "12px 8px", textAlign: "left" }}>Status</th>
+              <th style={{ padding: "12px 8px", textAlign: "left" }}>Time</th>
+              <th style={{ padding: "12px 8px", textAlign: "left" }}>Plus One</th>
+              <th style={{ padding: "12px 8px", textAlign: "center" }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
         {filteredGuests.length === 0 ? (
-          <div className="no-guests">No guests found</div>
-        ) : (
-          filteredGuests.map((guest) => (
-            <div key={guest._id} className="guest-card">
-              <div className="guest-info">
-                <h3>{guest.name}</h3>
-                <p>{guest.contact}</p>
-                <p>Plus One: {guest.plusOne || 0}</p>
-              </div>
-              <div className="guest-status">
-                <button
-                  className={`status-btn ${guest.status.toLowerCase()}`}
-                  onClick={() => handleStatusToggle(guest)}
-                >
-                  {guest.status}
-                </button>
-                <button
-                  className={`time-btn ${guest.time.toLowerCase().replace(' ', '-')}`}
-                  onClick={() => handleTimeToggle(guest)}
-                >
-                  {guest.time}
-                </button>
-              </div>
-              <div className="guest-actions">
-                <button
-                  className="invite-btn"
-                  onClick={() => handleSendInvitation(guest)}
-                  title="Send Invitation"
-                >
-                  <FaEnvelope />
-                </button>
-                <button
-                  className="edit-btn"
-                  onClick={() => handleEdit(guest)}
-                  title="Edit Guest"
-                >
-                  <FaEdit />
-                </button>
-                <button
-                  className="delete-btn"
-                  onClick={() => handleDelete(guest._id)}
-                  title="Delete Guest"
-                >
-                  <FaTrash />
-                </button>
-              </div>
-            </div>
-          ))
-        )}
+              <tr><td colSpan={7} style={{ textAlign: "center", padding: 24, color: "#b76a4a" }}>No guests found</td></tr>
+            ) : (
+              filteredGuests.map((guest, idx) => (
+                <tr key={guest._id || idx} style={{ borderBottom: "1px solid #f7e3c6" }}>
+                  <td style={{ textAlign: "center" }}><input type="checkbox" disabled /></td>
+                  <td style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 8px" }}>
+                    <span style={{ width: 36, height: 36, borderRadius: "50%", background: getAvatarColor(guest.name), display: "inline-flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "#fff", fontSize: 18 }}>
+                      {getInitials(guest.name)}
+                    </span>
+                    <span style={{ fontWeight: 600 }}>{guest.name}</span>
+                  </td>
+                  <td style={{ color: "#888", padding: "12px 8px" }}>{guest.contact}</td>
+                  <td style={{ padding: "12px 8px" }}>{guest.status}</td>
+                  <td style={{ padding: "12px 8px" }}>{guest.time}</td>
+                  <td style={{ padding: "12px 8px" }}>{guest.plusOne > 0 ? guest.plusOne : "No"}</td>
+                  <td style={{ textAlign: "center", padding: "12px 8px" }}>
+                    <span style={{ cursor: "pointer", color: "#388e3c", fontSize: 20, marginRight: 12 }} title="Edit Guest" onClick={() => handleEdit(guest)}>&#10003;</span>
+                    <span style={{ cursor: "pointer", color: "#b71c1c", fontSize: 20 }} title="Delete Guest" onClick={() => handleDelete(guest._id)}>X</span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
 
+      {/* Guest Summary */}
+      <div style={{ background: "#f7e3c6", borderRadius: 12, margin: "32px 24px 0 24px", padding: 24, boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+        <h2 style={{ fontFamily: "'Luckiest Guy', cursive, sans-serif", fontSize: "1.6rem", margin: 0, color: "#222" }}>GUEST SUMMARY</h2>
+        <div style={{ color: "#444", margin: "8px 0 18px 0", fontSize: "1rem" }}>Overview of your guest list status</div>
+        <div style={{ display: "flex", gap: 18, marginBottom: 18 }}>
+          <div style={{ background: "#d6a5c0", color: "#fff", borderRadius: 10, padding: "18px 32px", minWidth: 120, textAlign: "center", fontWeight: 700, fontSize: "1.1rem" }}>
+            Confirmed<br /><span style={{ fontSize: 22 }}>{confirmed}</span>
+              </div>
+          <div style={{ background: "#f7b5e6", color: "#fff", borderRadius: 10, padding: "18px 32px", minWidth: 120, textAlign: "center", fontWeight: 700, fontSize: "1.1rem" }}>
+            Pending<br /><span style={{ fontSize: 22 }}>{pending}</span>
+              </div>
+          <div style={{ background: "#e0b2b2", color: "#fff", borderRadius: 10, padding: "18px 32px", minWidth: 120, textAlign: "center", fontWeight: 700, fontSize: "1.1rem" }}>
+            Declined<br /><span style={{ fontSize: 22 }}>{declined}</span>
+              </div>
+            </div>
+        <div style={{ display: "flex", justifyContent: "space-between", color: "#222", fontWeight: 600, fontSize: "1.1rem" }}>
+          <span>Total guest = {totalGuests}</span>
+          <span>Plus one = {totalPlusOnes}</span>
+        </div>
+      </div>
+
+      {/* Modal for Add/Edit Guest */}
       {showForm && (
         <div className="modal">
           <div className="modal-content">
             <h2>{editId ? "Edit Guest" : "Add New Guest"}</h2>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="guest-form">
               <div className="form-group">
                 <label>Name:</label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  required
-                />
+                <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
               </div>
               <div className="form-group">
                 <label>Contact:</label>
-                <input
-                  type="tel"
-                  value={form.contact}
-                  onChange={(e) => setForm({ ...form, contact: e.target.value })}
-                  required
-                />
+                <input type="tel" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} required />
               </div>
               <div className="form-group">
                 <label>Status:</label>
-                <select
-                  value={form.status}
-                  onChange={(e) => setForm({ ...form, status: e.target.value })}
-                >
+                <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
                   {STATUS_OPTIONS.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
+                    <option key={status} value={status}>{status}</option>
                   ))}
                 </select>
               </div>
               <div className="form-group">
                 <label>Time:</label>
-                <select
-                  value={form.time}
-                  onChange={(e) => setForm({ ...form, time: e.target.value })}
-                >
+                <select value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })}>
                   {TIME_OPTIONS.map((time) => (
-                    <option key={time} value={time}>
-                      {time}
-                    </option>
+                    <option key={time} value={time}>{time}</option>
                   ))}
                 </select>
               </div>
               <div className="form-group">
                 <label>Plus One:</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={form.plusOne}
-                  onChange={(e) => setForm({ ...form, plusOne: e.target.value })}
-                />
+                <input type="number" min="0" value={form.plusOne} onChange={(e) => setForm({ ...form, plusOne: e.target.value })} />
               </div>
               <div className="form-actions">
-                <button type="submit">{editId ? "Update" : "Add"} Guest</button>
+                <button type="submit" className="submit-btn">{editId ? "Update" : "Add"} Guest</button>
                 <button type="button" onClick={() => {
                   setShowForm(false);
                   setEditId(null);
-                  setForm({
-                    name: "",
-                    contact: "",
-                    status: "Pending",
-                    time: "Not responded",
-                    plusOne: 0,
-                  });
-                }}>
-                  Cancel
-                </button>
+                  setForm({ name: "", contact: "", status: "Pending", time: "Not responded", plusOne: 0 });
+                }} className="cancel-btn">Cancel</button>
               </div>
             </form>
           </div>

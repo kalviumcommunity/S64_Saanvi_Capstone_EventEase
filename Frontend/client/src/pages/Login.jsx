@@ -8,7 +8,7 @@ import loginImage from '../assets/download.jpg';
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: '',
   });
   const [error, setError] = useState('');
@@ -30,7 +30,10 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
+        username: formData.username,
+        password: formData.password,
+      });
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       navigate('/home');
@@ -51,19 +54,19 @@ const Login = () => {
           <h1 className="auth-title login">Welcome Back</h1>
           <form className="auth-form" onSubmit={handleSubmit}>
             <div className="input-group">
-              <label className="auth-label login" htmlFor="email">
-                Email Address
+              <label className="auth-label login" htmlFor="username">
+                Username
               </label>
               <div className="input-wrapper">
                 <FaEnvelope className="input-icon login" />
                 <input
                   className="auth-input login"
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
+                  type="text"
+                  id="username"
+                  name="username"
+                  value={formData.username}
                   onChange={handleChange}
-                  placeholder="Enter your email"
+                  placeholder="Enter your username"
                   required
                 />
               </div>

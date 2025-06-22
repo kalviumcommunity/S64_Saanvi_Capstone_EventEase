@@ -3,6 +3,8 @@ import axios from "axios";
 import "../Styles/BudgetManagementPage.css";
 import { FaEdit, FaTrash, FaPlus, FaSave, FaTimes } from "react-icons/fa";
 
+const breakdownColors = ['#42a5f5','#ec407a','#66bb6a','#ffa726','#7c4dff'];
+
 const BudgetManagementPage = () => {
   // Category colors
   const categoryColors = {
@@ -29,6 +31,10 @@ const BudgetManagementPage = () => {
     actualCost: "",
     status: "Pending"
   });
+
+  // Add state for editing total budget
+  const [editingBudget, setEditingBudget] = useState(false);
+  const [budgetInput, setBudgetInput] = useState(totalBudget);
 
   // Fetch budget items from backend
   useEffect(() => {
@@ -282,204 +288,209 @@ const BudgetManagementPage = () => {
     setError(null);
   };
 
-  return (
-    <div className="budget-page">
-      <main className="budget-container">
-        <h1 className="page-title">Budget Tracker</h1>
-        <p className="page-subtitle">Keep track of your event expenses and stay within your budget.</p>
+  // Handler for budget input blur or Enter
+  const handleBudgetInputBlur = () => {
+    setEditingBudget(false);
+    if (budgetInput !== totalBudget) {
+      setTotalBudget(Number(budgetInput));
+    }
+  };
+  const handleBudgetInputKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleBudgetInputBlur();
+    }
+  };
 
-        <div className="budget-summary">
-          <div className="budget-overview">
-            <div className="budget-card">
-              <h3>Total Budget</h3>
-              <div className="budget-input-container">
-                <span>$</span>
+  // Add the handler for updating actual cost
+  const handleUpdateActualCost = async (updatedItem) => {
+    try {
+      const budgetData = {
+        ...updatedItem,
+        estimatedCost: parseFloat(updatedItem.estimatedCost),
+        actualCost: updatedItem.actualCost ? parseFloat(updatedItem.actualCost) : 0,
+      };
+      const response = await axios.put(`/api/budget/${updatedItem._id}`, budgetData);
+      setBudgetItems(budgetItems.map(item =>
+        item._id === updatedItem._id ? response.data : item
+      ));
+    } catch (err) {
+      alert('Failed to update actual cost');
+    }
+  };
+
+  return (
+    <div className="budget-page" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #fdf6e3 0%, #e0c3fc 100%)', paddingBottom: 40 }}>
+      <main className="budget-container" style={{ boxShadow: '0 8px 32px rgba(124,77,255,0.10)', borderRadius: 24, marginTop: 32, background: 'rgba(255,255,255,0.95)' }}>
+        <h1 className="page-title" style={{ fontFamily: 'Luckiest Guy, cursive', fontSize: '2.7rem', color: '#7c4dff', textShadow: '2px 2px 0 #f7b5e6' }}>Budget Tracker</h1>
+        <p className="page-subtitle" style={{ color: '#7c4dff', fontWeight: 600, fontSize: '1.15rem', textShadow: '1px 1px 0 #fffbe6' }}>Keep track of your event expenses and stay within your budget.</p>
+
+        <div style={{ display: "flex", gap: "24px", justifyContent: "center", margin: "32px 0" }}>
+          <div className="budget-card" style={{ background: 'linear-gradient(135deg, #fffbe6 60%, #ffe0b2 100%)', border: '2px solid #ffd54f', boxShadow: '0 4px 16px #ffe08255', borderRadius: 18 }}>
+            <h3 style={{ color: '#b26a00', fontWeight: 700, fontFamily: 'Luckiest Guy, cursive' }}>Total Budget</h3>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "1.5rem", cursor: 'pointer' }} onClick={() => setEditingBudget(true)}>
+              {editingBudget ? (
                 <input
                   type="number"
-                  value={totalBudget}
-                  onChange={handleBudgetChange}
-                  className="budget-input"
+                  value={budgetInput}
+                  autoFocus
+                  onChange={e => setBudgetInput(e.target.value)}
+                  onBlur={handleBudgetInputBlur}
+                  onKeyDown={handleBudgetInputKeyDown}
+                  style={{ fontSize: '1.5rem', fontWeight: 'bold', width: 100, borderRadius: 8, border: '2px solid #ffd54f', boxShadow: '0 0 8px #ffe082', padding: '2px 8px', outline: 'none' }}
                 />
-              </div>
+              ) : (
+                <span style={{ marginRight: 8 }}>₹{totalBudget.toLocaleString()}</span>
+              )}
+              <span role="img" aria-label="budget">💰</span>
             </div>
-            <div className="budget-card">
-              <h3>Spent So Far</h3>
-              <p className="spent-amount">${spendSoFar.toLocaleString()}</p>
+          </div>
+          <div className="budget-card" style={{ background: 'linear-gradient(135deg, #fffbe6 60%, #b2ebf2 100%)', border: '2px solid #4dd0e1', boxShadow: '0 4px 16px #4dd0e155', borderRadius: 18 }}>
+            <h3 style={{ color: '#00838f', fontWeight: 700, fontFamily: 'Luckiest Guy, cursive' }}>Spend so far</h3>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "1.5rem" }}>
+              <span style={{ marginRight: 8 }}>₹{spendSoFar.toLocaleString()}</span>
+              <span role="img" aria-label="spent">⚙️</span>
             </div>
-            <div className="budget-card">
-              <h3>Remaining</h3>
-              <p className={`remaining-amount ${remainingBudget < 0 ? 'over-budget' : ''}`}>
-                ${remainingBudget.toLocaleString()}
-              </p>
+          </div>
+          <div className="budget-card" style={{ background: 'linear-gradient(135deg, #fffbe6 60%, #c5e1a5 100%)', border: '2px solid #81c784', boxShadow: '0 4px 16px #aed58155', borderRadius: 18 }}>
+            <h3 style={{ color: '#33691e', fontWeight: 700, fontFamily: 'Luckiest Guy, cursive' }}>Remaining budget</h3>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "1.5rem" }}>
+              <span style={{ marginRight: 8 }}>₹{remainingBudget.toLocaleString()}</span>
+              <span role="img" aria-label="remaining"></span>
             </div>
           </div>
         </div>
 
-        <div className="budget-breakdown">
-          <h2>Budget Breakdown</h2>
-          <div className="breakdown-grid">
-            {categoryTotals.map((category) => (
-              <div key={category.category} className="breakdown-card">
-                <div className="breakdown-header">
-                  <h3>{category.category}</h3>
-                  <div 
-                    className="category-color" 
-                    style={{ backgroundColor: categoryColors[category.category] || '#999' }}
-                  ></div>
+        <div style={{ display: "flex", gap: "40px", justifyContent: "center", alignItems: "flex-start" }}>
+          <div className="budget-breakdown" style={{ minWidth: 320, background: "#fdf6e3", borderRadius: 18, padding: 24, boxShadow: '0 2px 12px #b39ddb33', border: '2px solid #b39ddb' }}>
+            <h2 style={{ fontWeight: 700, fontSize: "1.3rem", marginBottom: 24, color: '#7c4dff', fontFamily: 'Luckiest Guy, cursive' }}>Budget Breakdown</h2>
+            {categoryTotals.map((cat, idx) => (
+              <div key={cat.category} style={{ marginBottom: 18 }}>
+                <div style={{ fontWeight: 700, color: breakdownColors[idx], fontSize: 18 }}>{cat.category}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <input type="range" min="0" max={totalBudget} value={cat.estimated} disabled style={{ accentColor: breakdownColors[idx], width: 140, background: 'transparent' }} />
+                  <span style={{ fontSize: 14, color: '#888' }}>Estimated</span>
+                  <span style={{ fontWeight: 600, marginLeft: 8, color: '#222' }}>{cat.estimated.toLocaleString()}</span>
                 </div>
-                <div className="breakdown-bars">
-                  <div className="bar-container">
-                    <div className="bar-label">Estimated</div>
-                    <div className="progress-bar">
-                      <div 
-                        className="progress-fill estimated"
-                        style={{ width: `${calculatePercentage(category.estimated)}%` }}
-                      ></div>
-                    </div>
-                    <span className="bar-amount">${category.estimated.toLocaleString()}</span>
-                  </div>
-                  <div className="bar-container">
-                    <div className="bar-label">Actual</div>
-                    <div className="progress-bar">
-                      <div 
-                        className="progress-fill actual"
-                        style={{ width: `${calculatePercentage(category.actual)}%` }}
-                      ></div>
-                    </div>
-                    <span className="bar-amount">${category.actual.toLocaleString()}</span>
-                  </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
+                  <input type="range" min="0" max={totalBudget} value={cat.actual} disabled style={{ accentColor: breakdownColors[idx], width: 140, opacity: 0.7, background: 'transparent' }} />
+                  <span style={{ fontSize: 14, color: '#888' }}>Actual</span>
+                  <span style={{ fontWeight: 600, marginLeft: 8, color: '#222' }}>{cat.actual.toLocaleString()}</span>
                 </div>
               </div>
             ))}
-          </div>
+            <div style={{ marginTop: 32, fontWeight: 600, color: '#7c4dff' }}>
+              <div>Estimated <span style={{ float: "right" }}>₹{estimatedTotal.toLocaleString()}</span></div>
+              <div>Actual <span style={{ float: "right" }}>₹{actualTotal.toLocaleString()}</span></div>
+              <div>Difference <span style={{ float: "right" }}>₹{difference.toLocaleString()}</span></div>
+            </div>
         </div>
 
-        <div className="budget-items-section">
-          <div className="section-header">
-            <h2>Budget Items</h2>
-            <button 
-              className="add-item-btn"
-              onClick={() => setShowAddForm(true)}
-            >
-              <FaPlus /> Add Item
+          <div className="budget-items" style={{ flex: 1, background: "#fdf6e3", borderRadius: 18, padding: 24, boxShadow: '0 2px 12px #ffd54f33', border: '2px solid #ffd54f' }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+              <h2 style={{ fontWeight: 700, fontSize: "1.3rem", color: '#b26a00', fontFamily: 'Luckiest Guy, cursive', letterSpacing: 1 }}>Budget Items</h2>
+              <button className="add-item-btn" style={{ background: "linear-gradient(90deg,#f7b5e6,#ffd54f)", borderRadius: 16, padding: "10px 22px", fontWeight: 700, fontSize: "1.1rem", color: '#7c4dff', boxShadow: '0 2px 8px #ffd54f55', border: 'none', transition: 'box-shadow 0.2s' }} onMouseOver={e => e.currentTarget.style.boxShadow='0 4px 16px #ffd54f99'} onMouseOut={e => e.currentTarget.style.boxShadow='0 2px 8px #ffd54f55'} onClick={() => setShowAddForm(true)}>
+                <FaPlus style={{ marginRight: 6 }} /> Add Item
             </button>
           </div>
-
-          {error && (
-            <div className="error-message">
-              {error}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 18, marginBottom: 12 }}>
+              <span style={{ background: '#ffe0b2', color: '#b26a00', borderRadius: 12, padding: '6px 16px', fontWeight: 700, fontSize: '1.05rem', boxShadow: '0 2px 8px #ffd54f33' }}>
+                Pending: {budgetItems.filter(item => item.status.toLowerCase() === 'pending').length}
+              </span>
+              <span style={{ background: '#c8e6c9', color: '#256029', borderRadius: 12, padding: '6px 16px', fontWeight: 700, fontSize: '1.05rem', boxShadow: '0 2px 8px #66bb6a33' }}>
+                Paid: {budgetItems.filter(item => item.status.toLowerCase() === 'paid').length}
+              </span>
             </div>
-          )}
-
-          <div className="tab-buttons">
-            <button 
-              className={`tab-btn ${activeTab === "All" ? "active" : ""}`}
-              onClick={() => setActiveTab("All")}
-            >
-              All ({budgetItems.length})
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === "Paid" ? "active" : ""}`}
-              onClick={() => setActiveTab("Paid")}
-            >
-              Paid ({budgetItems.filter(item => item.status === "Paid").length})
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === "Pending" ? "active" : ""}`}
-              onClick={() => setActiveTab("Pending")}
-            >
-              Pending ({budgetItems.filter(item => item.status === "Pending").length})
-            </button>
+            <div style={{ display: "flex", gap: 18, marginBottom: 18 }}>
+              <button className={`tab-btn ${activeTab === "All" ? "active" : ""}`} style={{ background: '#f7b5e6', color: '#7c4dff', borderRadius: 12, fontWeight: 700, border: 'none', padding: '8px 18px', boxShadow: '0 2px 8px #f7b5e655', transition: 'box-shadow 0.2s' }} onClick={() => setActiveTab("All")}>All</button>
+              <button className={`tab-btn ${activeTab === "Paid" ? "active" : ""}`} style={{ background: '#c8e6c9', color: '#256029', borderRadius: 12, fontWeight: 700, border: 'none', padding: '8px 18px', boxShadow: '0 2px 8px #66bb6a55', transition: 'box-shadow 0.2s' }} onClick={() => setActiveTab("Paid")}>Paid</button>
+              <button className={`tab-btn ${activeTab === "Pending" ? "active" : ""}`} style={{ background: '#ffe0b2', color: '#b26a00', borderRadius: 12, fontWeight: 700, border: 'none', padding: '8px 18px', boxShadow: '0 2px 8px #ffd54f55', transition: 'box-shadow 0.2s' }} onClick={() => setActiveTab("Pending")}>Pending</button>
           </div>
-
-          {loading ? (
-            <div className="loading">Loading budget items...</div>
-          ) : (
-            <div className="budget-items-grid">
-              {getFilteredItems().map((item) => (
-                <div key={item._id} className="budget-item-card">
-                  <div className="item-header">
-                    <div className="item-category">
-                      <div 
-                        className="category-indicator"
-                        style={{ backgroundColor: categoryColors[item.category] || '#999' }}
-                      ></div>
-                      <span>{item.category}</span>
-                    </div>
-                    <div className="item-actions">
+            <table style={{ width: "100%", background: "#f7e3c6", borderCollapse: "separate", borderSpacing: 0, borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 8px #ffd54f33' }}>
+              <thead style={{ background: "linear-gradient(90deg,#f7b5e6,#ffd54f)", color: '#7c4dff' }}>
+                <tr>
+                  <th style={{ textAlign: "left", padding: '12px 8px', color: '#a67c00', fontWeight: 700 }}>Item</th>
+                  <th style={{ textAlign: "left", padding: '12px 8px', color: '#a67c00', fontWeight: 700 }}>Vendor</th>
+                  <th style={{ textAlign: "left", padding: '12px 8px', color: '#a67c00', fontWeight: 700 }}>Estimated</th>
+                  <th style={{ textAlign: "left", padding: '12px 8px', color: '#a67c00', fontWeight: 700 }}>Actual</th>
+                  <th style={{ textAlign: "left", padding: '12px 8px', color: '#a67c00', fontWeight: 700 }}>Status</th>
+                  <th style={{ textAlign: "left", padding: '12px 8px', color: '#a67c00', fontWeight: 700 }}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {getFilteredItems().map(item => (
+                  <tr key={item._id} style={{
+                    background: item.status.toLowerCase() === 'paid' ? '#e8f5e9'
+                      : item.status.toLowerCase() === 'pending' ? '#fff8e1'
+                      : '#fff',
+                    borderBottom: '1px solid #e3b08a',
+                    transition: 'background 0.2s',
+                    cursor: 'pointer'
+                  }}
+                    onMouseOver={e => e.currentTarget.style.background='#ffe0b2'}
+                    onMouseOut={e => e.currentTarget.style.background=(item.status.toLowerCase() === 'paid' ? '#e8f5e9' : item.status.toLowerCase() === 'pending' ? '#fff8e1' : '#fff')}
+                  >
+                    <td style={{ padding: '10px 8px' }}>
+                      <span style={{ fontWeight: "bold", color: '#7c4dff' }}>{item.itemName}</span>
+                      <br />
+                      <span style={{ fontSize: "0.95em", color: "#a67c00" }}>{item.category}</span>
+                    </td>
+                    <td style={{ padding: '10px 8px', color: '#00838f', fontWeight: 600 }}>{item.vendor}</td>
+                    <td style={{ padding: '10px 8px', color: '#b26a00', fontWeight: 600 }}>₹{item.estimatedCost.toLocaleString()}</td>
+                    <td style={{ padding: '10px 8px', color: '#33691e', fontWeight: 600 }}>
+                      <input
+                        type="number"
+                        value={item.actualCost || ''}
+                        min="0"
+                        style={{ width: 90, borderRadius: 8, border: '1px solid #ffd54f', padding: '2px 8px', fontWeight: 600, color: '#33691e', background: '#fff' }}
+                        onChange={e => {
+                          const newValue = e.target.value;
+                          // Call update logic for actualCost only
+                          const updatedItem = { ...item, actualCost: newValue };
+                          handleUpdateActualCost(updatedItem);
+                        }}
+                      />
+                    </td>
+                    <td style={{ padding: '10px 8px', cursor: 'pointer' }} onClick={() => toggleStatus(item)}>
+                      <span style={{
+                        display: 'inline-block',
+                        background: item.status.toLowerCase() === 'paid' ? 'linear-gradient(90deg,#c8e6c9,#81c784)' : 'linear-gradient(90deg,#ffe0b2,#ffd54f)',
+                        color: item.status.toLowerCase() === 'paid' ? '#256029' : '#b26a00',
+                        borderRadius: 12,
+                        padding: '6px 16px',
+                        fontWeight: 700,
+                        fontSize: '1.05rem',
+                        textTransform: 'capitalize',
+                        userSelect: 'none',
+                        boxShadow: '0 2px 8px #ffd54f55',
+                        border: item.status.toLowerCase() === 'paid' ? '2px solid #81c784' : '2px solid #ffd54f',
+                        transition: 'box-shadow 0.2s, border 0.2s',
+                        backgroundClip: 'padding-box',
+                        WebkitBackgroundClip: 'padding-box',
+                        filter: 'drop-shadow(0 2px 8px #ffd54f33)'
+                      }}>{item.status}</span>
+                    </td>
+                    <td style={{ padding: '10px 8px' }}>
                       <button 
-                        className="action-btn edit-btn"
-                        onClick={() => handleEditItem(item)}
-                        title="Edit"
+                        style={{ background: '#f7b5e6', border: 'none', borderRadius: 8, padding: '6px 12px', color: '#7c4dff', fontWeight: 700, cursor: 'pointer', marginRight: 8 }}
+                        onClick={e => { e.stopPropagation(); handleEditItem(item); }}
                       >
-                        <FaEdit />
+                      Edit
                       </button>
-                      <button 
-                        className="action-btn delete-btn"
-                        onClick={() => handleDeleteItem(item._id)}
-                        title="Delete"
-                      >
-                        <FaTrash />
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <h3 className="item-name">{item.itemName}</h3>
-                  <p className="item-vendor">{item.vendor}</p>
-                  
-                  <div className="item-costs">
-                    <div className="cost-row">
-                      <span>Estimated:</span>
-                      <span className="estimated-cost">${item.estimatedCost.toLocaleString()}</span>
-                    </div>
-                    <div className="cost-row">
-                      <span>Actual:</span>
-                      <span className="actual-cost">
-                        {item.actualCost ? `$${item.actualCost.toLocaleString()}` : "Not set"}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="item-status">
-                    <button 
-                      className={`status-btn ${item.status.toLowerCase()}`}
-                      onClick={() => toggleStatus(item)}
-                    >
-                      {item.status}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {getFilteredItems().length === 0 && !loading && (
-            <div className="no-items">
-              <p>No budget items found. Add your first item to get started!</p>
-            </div>
-          )}
-        </div>
-
-        {/* Add/Edit Form Modal */}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
         {showAddForm && (
           <div className="modal-overlay">
             <div className="modal-content">
               <div className="modal-header">
-                <h2>{editingItem ? "Edit Budget Item" : "Add Budget Item"}</h2>
-                <button className="close-btn" onClick={cancelForm}>
-                  <FaTimes />
-                </button>
+                    <h2 style={{ color: '#7c4dff', fontFamily: 'Luckiest Guy, cursive' }}>{editingItem ? "Edit Budget Item" : "Add Budget Item"}</h2>
+                    <button className="close-btn" onClick={cancelForm}>×</button>
               </div>
-              
-              <form onSubmit={editingItem ? handleUpdateItem : handleAddItem}>
-                <div className="form-group">
-                  <label>Category *</label>
-                  <select 
-                    name="category" 
-                    value={newItem.category} 
-                    onChange={handleInputChange}
-                    required
-                  >
+                  <form onSubmit={editingItem ? handleUpdateItem : handleAddItem} style={{ marginTop: 16 }}>
+                    <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
+                      <select name="category" value={newItem.category} onChange={handleInputChange} required style={{ borderRadius: 16, background: "#f7b5e6", border: "2px solid #ffd54f", padding: "12px", width: "100%", fontWeight: 600, color: '#7c4dff' }}>
                     <option value="">Select Category</option>
                     <option value="Venue">Venue</option>
                     <option value="Catering">Catering</option>
@@ -487,85 +498,22 @@ const BudgetManagementPage = () => {
                     <option value="Photography">Photography</option>
                     <option value="Entertainment">Entertainment</option>
                   </select>
+                      <input name="itemName" value={newItem.itemName} onChange={handleInputChange} placeholder="Item Name" required style={{ borderRadius: 16, background: "#f7b5e6", border: "2px solid #ffd54f", padding: "12px", width: "100%", fontWeight: 600, color: '#7c4dff' }} />
                 </div>
-                
-                <div className="form-group">
-                  <label>Item Name *</label>
-                  <input
-                    type="text"
-                    name="itemName"
-                    value={newItem.itemName}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Wedding Hall, Main Course"
-                    required
-                  />
+                    <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
+                      <input name="estimatedCost" value={newItem.estimatedCost} onChange={handleInputChange} placeholder="Estimated Cost" required style={{ borderRadius: 16, background: "#ffe0b2", border: "2px solid #ffd54f", padding: "12px", width: "100%", fontWeight: 600, color: '#b26a00' }} />
+                      <input name="vendor" value={newItem.vendor} onChange={handleInputChange} placeholder="Vendor" required style={{ borderRadius: 16, background: "#b2ebf2", border: "2px solid #4dd0e1", padding: "12px", width: "100%", fontWeight: 600, color: '#00838f' }} />
                 </div>
-                
-                <div className="form-group">
-                  <label>Vendor *</label>
-                  <input
-                    type="text"
-                    name="vendor"
-                    value={newItem.vendor}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Dream Venue Hall"
-                    required
-                  />
-                </div>
-                
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Estimated Cost *</label>
-                    <input
-                      type="number"
-                      name="estimatedCost"
-                      value={newItem.estimatedCost}
-                      onChange={handleInputChange}
-                      placeholder="0"
-                      min="0"
-                      step="0.01"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label>Actual Cost</label>
-                    <input
-                      type="number"
-                      name="actualCost"
-                      value={newItem.actualCost}
-                      onChange={handleInputChange}
-                      placeholder="0"
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                </div>
-                
-                <div className="form-group">
-                  <label>Status</label>
-                  <select 
-                    name="status" 
-                    value={newItem.status} 
-                    onChange={handleInputChange}
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Paid">Paid</option>
-                  </select>
-                </div>
-                
-                <div className="form-actions">
-                  <button type="button" className="cancel-btn" onClick={cancelForm}>
-                    Cancel
-                  </button>
-                  <button type="submit" className="save-btn">
-                    {editingItem ? <><FaSave /> Update</> : <><FaPlus /> Add</>}
-                  </button>
+                    <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
+                      <button type="button" onClick={cancelForm} style={{ background: "#f7b5e6", borderRadius: 16, padding: "10px 22px", fontWeight: 700, fontSize: "1.1rem", border: "none", color: '#7c4dff', boxShadow: '0 2px 8px #f7b5e655' }}>cancel</button>
+                      <button type="submit" style={{ background: "#ffd54f", borderRadius: 16, padding: "10px 22px", fontWeight: 700, fontSize: "1.1rem", border: "none", color: '#b26a00', boxShadow: '0 2px 8px #ffd54f55' }}>Add item</button>
                 </div>
               </form>
             </div>
           </div>
         )}
+          </div>
+        </div>
       </main>
     </div>
   );

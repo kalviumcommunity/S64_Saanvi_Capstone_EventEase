@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const User = require('../models/User');
+const { protect } = require('../middleware/authMiddleware');
 
 // Ensure uploads directory exists
 const uploadsDir = path.resolve(__dirname, '../uploads');
@@ -54,12 +55,11 @@ const upload = multer({
 });
 
 // Get user profile
-router.get('/', async (req, res) => {
+router.get('/', protect, async (req, res) => {
   try {
-    // Only fetch and return user, do not create or update
-    const user = await User.findOne().select('-password');
+    const user = await User.findById(req.user._id).select('-password');
     if (!user) {
-      return res.status(404).json({ message: 'No users found' });
+      return res.status(404).json({ message: 'User not found' });
     }
     res.json(user);
   } catch (err) {
@@ -69,20 +69,17 @@ router.get('/', async (req, res) => {
 });
 
 // Update user profile
-router.put('/update', async (req, res) => {
+router.put('/update', protect, async (req, res) => {
   try {
-    // Only update if user exists
-    let user = await User.findOne();
+    let user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: 'No user found' });
     }
-
     // Update user fields
     const updates = {};
     if (req.body.firstName !== undefined) updates.firstName = req.body.firstName;
     if (req.body.lastName !== undefined) updates.lastName = req.body.lastName;
     if (req.body.phone !== undefined) updates.phone = req.body.phone;
-    
     // Update address if any address field is provided
     if (req.body.street || req.body.city || req.body.state || req.body.zipcode) {
       updates.address = {
@@ -92,14 +89,12 @@ router.put('/update', async (req, res) => {
         zipcode: req.body.zipcode || user.address?.zipcode || ''
       };
     }
-
     // Update the user with the new data
-    const updatedUser = await User.findOneAndUpdate(
-      { _id: user._id },
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
       { $set: updates },
       { new: true, runValidators: true }
     ).select('-password');
-
     res.json({ message: 'Profile updated successfully', user: updatedUser });
   } catch (err) {
     console.error('Error updating profile:', err);
@@ -112,59 +107,34 @@ router.put('/update', async (req, res) => {
 });
 
 // Upload profile image
-router.post('/upload-image', upload.single('profileImage'), async (req, res) => {
+router.post('/upload-image', protect, upload.single('profileImage'), async (req, res) => {
   try {
-    console.log('Uploading profile image');
-    console.log('Request file:', req.file);
-    
     if (!req.file) {
       return res.status(400).json({ message: 'No image file provided' });
     }
-
-    // Find the first user (for testing)
-    let user = await User.findOne();
+    let user = await User.findById(req.user._id);
     if (!user) {
-      console.log('No user found, creating test user');
-      user = new User({
-        username: 'testuser',
-        email: 'test@example.com',
-        password: 'password123'
-      });
-      await user.save();
+      return res.status(404).json({ message: 'User not found' });
     }
-
     // Delete old profile image if it exists
     if (user.profileImage) {
       const oldImagePath = path.join(profilesDir, path.basename(user.profileImage));
-      console.log('Checking old image at:', oldImagePath);
       if (fs.existsSync(oldImagePath)) {
-        console.log('Deleting old image');
         fs.unlinkSync(oldImagePath);
       }
     }
-
     const imageUrl = `/api/uploads/profiles/${req.file.filename}`;
-    console.log('Setting new image URL:', imageUrl);
-
-    // Update the user with the new image
-    const updatedUser = await User.findOneAndUpdate(
-      { _id: user._id },
-      { $set: { profileImage: imageUrl } },
-      { new: true, runValidators: true }
-    ).select('-password');
-
-    console.log('Updated user:', updatedUser);
-    
+    user.profileImage = imageUrl;
+    await user.save();
     res.json({ 
-      message: 'Profile image updated successfully', 
-      profileImage: updatedUser.profileImage,
-      user: updatedUser
+      message: 'Profile image uploaded successfully', 
+      profileImage: user.profileImage,
+      user: user
     });
   } catch (err) {
     console.error('Error uploading profile image:', err);
     if (req.file) {
       const filePath = path.join(profilesDir, req.file.filename);
-      console.log('Cleaning up uploaded file:', filePath);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
@@ -178,13 +148,12 @@ router.post('/upload-image', upload.single('profileImage'), async (req, res) => 
 });
 
 // Delete profile image
-router.delete('/image', async (req, res) => {
+router.delete('/image', protect, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
     if (user.profileImage) {
       const imagePath = path.join(profilesDir, path.basename(user.profileImage));
       if (fs.existsSync(imagePath)) {
@@ -193,11 +162,32 @@ router.delete('/image', async (req, res) => {
       user.profileImage = '';
       await user.save();
     }
-
     res.json({ message: 'Profile image deleted successfully' });
   } catch (err) {
     console.error('Error deleting profile image:', err);
     res.status(500).json({ message: 'Error deleting profile image', error: err.message });
+  }
+});
+
+// Delete account
+router.delete('/', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Optionally delete profile image
+    if (user.profileImage) {
+      const imagePath = path.join(profilesDir, path.basename(user.profileImage));
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+    await User.deleteOne({ _id: user._id });
+    res.json({ message: 'Account deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting account:', err);
+    res.status(500).json({ message: 'Error deleting account', error: err.message });
   }
 });
 

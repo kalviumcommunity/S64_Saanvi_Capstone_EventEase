@@ -15,18 +15,24 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
   
-  .budget-page {
-    background-color: var(--primary-color);
-    min-height: 100vh;
+  .budget-page, .budget-container {
+    background: #fffbe6 !important;
+    color: #222 !important;
+    font-family: 'Nunito', Arial, sans-serif !important;
   }
   
-  /* Header */
+  .budget-header, .budget-summary, .budget-breakdown, .budget-items {
+    background: #fdf6e3 !important;
+    border-radius: 18px !important;
+    color: #222 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+  }
+  
   .budget-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 1rem 2rem;
-    background-color: var(--secondary-color);
   }
   
   .logo-container {
@@ -60,44 +66,28 @@
     margin-left: 2rem;
   }
   
-  /* Main Content */
-  .budget-container {
-    padding: 1.5rem 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  
-  .page-title {
-    font-size: 2rem;
-    text-align: center;
-    margin-bottom: 0.5rem;
-  }
-  
-  .page-subtitle {
-    text-align: center;
-    color: #555;
-    margin-bottom: 1.5rem;
-  }
-  
-  /* Budget Summary Cards */
   .budget-summary {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 2rem;
+    gap: 24px;
+    margin: 0 auto 32px auto;
+    justify-content: center;
   }
   
   .budget-card {
-    background-color: var(--light-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1rem;
-    width: 32%;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: #f7e3c6 !important;
+    border-radius: 16px !important;
+    color: #222 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+    padding: 1.5rem 2.5rem !important;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
   }
   
   .budget-card h3 {
-    font-size: 1rem;
+    font-size: 1.1rem;
     margin-bottom: 0.5rem;
+    color: #222 !important;
   }
   
   .card-value-container {
@@ -124,20 +114,35 @@
     font-size: 1.5rem;
   }
   
-  /* Budget Content */
   .budget-content {
     display: flex;
-    gap: 2rem;
+    gap: 40px;
+    justify-content: center;
+    align-items: flex-start;
+    margin: 0 auto;
+    max-width: 1200px;
+  }
+  
+  .page-title {
+    font-family: 'Luckiest Guy', cursive, sans-serif !important;
+    font-size: 2.5rem !important;
+    color: #222 !important;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 0.2em;
+  }
+  
+  .page-subtitle {
+    text-align: center;
+    color: #444 !important;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
   }
   
   /* Budget Breakdown */
   .budget-breakdown {
-    background-color: var(--light-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1rem;
-    flex: 0 0 30%;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 2rem 1.5rem !important;
+    min-width: 300px;
   }
   
   .budget-breakdown h2 {
@@ -191,12 +196,7 @@
   
   /* Budget Items */
   .budget-items {
-    background-color: var(--light-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1rem;
-    flex: 1;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 2rem 1.5rem !important;
   }
   
   .budget-items-header {
@@ -343,6 +343,52 @@
     color: #f57f17;
   }
   
+  /* Override unwanted button, input, and table styles */
+  .budget-items input, .budget-items select, .budget-items textarea {
+    background: #f7e3c6 !important;
+    border-radius: 12px !important;
+    border: 1px solid #e3b08a !important;
+    color: #222 !important;
+    font-size: 1.1rem !important;
+    padding: 0.7em 1em !important;
+    margin-bottom: 1em;
+  }
+  
+  .budget-items button, .budget-summary button {
+    background: #f7b5e6 !important;
+    color: #222 !important;
+    border-radius: 12px !important;
+    font-weight: bold !important;
+    font-size: 1.1rem !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+  }
+  
+  .budget-table th, .budget-table td {
+    color: #222 !important;
+    background: transparent !important;
+    font-size: 1.1rem !important;
+    border: none !important;
+  }
+  
+  .budget-table th {
+    font-weight: bold !important;
+    background: #f7e3c6 !important;
+  }
+  
+  .budget-table tr {
+    border-bottom: 1px solid #e3b08a !important;
+  }
+  
+  .budget-table tr:last-child {
+    border-bottom: none !important;
+  }
+  
+  /* Fix for unwanted blue background */
+  body.budget-page, .budget-page {
+    background: #fffbe6 !important;
+  }
+  
   /* Responsive styles */
   @media (max-width: 950px) {
     .budget-content {
@@ -367,9 +413,6 @@
     .form-row {
       flex-direction: column;
     }
-  }
-  body, .budget-page, .budget-container {
-    color: #222 !important; /* Ensures all text is dark */
   }
   
   .budget-header,
@@ -422,4 +465,6 @@
     background-color: #ffecb3;
     color: #a67c00 !important;
   }
+  
+  /* Add/modify styles to match the screenshot, including summary cards, breakdown, item table, and form. Use pastel backgrounds, rounded corners, and bold fonts. */
     

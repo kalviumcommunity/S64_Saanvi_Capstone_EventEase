@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import '../styles/Profile.css';
+import { useAuth } from '../Context/AuthContext';
 
 // Import icons
 import EventIcon from '@mui/icons-material/Event';
@@ -15,6 +16,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [profileImage, setProfileImage] = useState('/default-avatar.png');
   const [isEditing, setIsEditing] = useState(false);
@@ -29,13 +31,37 @@ const Profile = () => {
     zipcode: ''
   });
 
+  // Helper to get auth config
+  const getAuthConfig = () => {
+    const token = localStorage.getItem('token');
+    return {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    };
+  };
+
   useEffect(() => {
-    fetchUserProfile();
-  }, []);
+    if (user) {
+      fetchUserProfile();
+    } else {
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        street: '',
+        city: '',
+        state: '',
+        zipcode: ''
+      });
+      setProfileImage('/default-avatar.png');
+    }
+  }, [user]);
 
   const fetchUserProfile = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/profile`);
+      const response = await axios.get(`${API_URL}/api/profile`, getAuthConfig());
       const userData = response.data;
       setFormData({
         firstName: userData.firstName || '',
@@ -47,16 +73,26 @@ const Profile = () => {
         state: userData.address?.state || '',
         zipcode: userData.address?.zipcode || ''
       });
-      
       if (userData.profileImage) {
         const imageUrl = userData.profileImage.startsWith('http') 
           ? userData.profileImage 
           : `${API_URL}${userData.profileImage}`;
         setProfileImage(imageUrl);
+      } else {
+        setProfileImage('/default-avatar.png');
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
-      toast.error('Failed to load profile information');
+      setProfileImage('/default-avatar.png');
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        street: '',
+        city: '',
+        state: '',
+        zipcode: ''
+      });
     }
   };
 
@@ -73,13 +109,12 @@ const Profile = () => {
           city: formData.city,
           state: formData.state,
           zipcode: formData.zipcode
-        }
+        },
+        getAuthConfig()
       );
-
       setIsEditing(false);
       toast.success('Profile updated successfully');
     } catch (error) {
-      console.error('Error updating profile:', error);
       toast.error('Failed to update profile');
     } finally {
       setIsLoading(false);
@@ -93,27 +128,25 @@ const Profile = () => {
         toast.error('File size should be less than 5MB');
         return;
       }
-
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
       if (!allowedTypes.includes(file.type)) {
         toast.error('Only JPG, JPEG, and PNG files are allowed');
         return;
       }
-
       try {
-        const formData = new FormData();
-        formData.append('profileImage', file);
-
+        const formDataImg = new FormData();
+        formDataImg.append('profileImage', file);
         const response = await axios.post(
           `${API_URL}/api/profile/upload-image`,
-          formData,
+          formDataImg,
           {
+            ...getAuthConfig(),
             headers: {
+              ...getAuthConfig().headers,
               'Content-Type': 'multipart/form-data'
             }
           }
         );
-
         const imagePath = response.data.profileImage;
         const imageUrl = imagePath.startsWith('http') 
           ? imagePath 
@@ -121,7 +154,6 @@ const Profile = () => {
         setProfileImage(imageUrl);
         toast.success('Profile image updated successfully');
       } catch (error) {
-        console.error('Error uploading image:', error);
         toast.error(error.response?.data?.message || 'Failed to upload profile image');
       }
     }
@@ -142,7 +174,7 @@ const Profile = () => {
   const handleDeleteAccount = async () => {
     if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
       try {
-        await axios.delete(`${API_URL}/api/profile`);
+        await axios.delete(`${API_URL}/api/profile`, getAuthConfig());
         navigate('/login');
         toast.success('Account deleted successfully');
       } catch (error) {

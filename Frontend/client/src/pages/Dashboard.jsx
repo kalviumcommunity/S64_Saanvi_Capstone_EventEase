@@ -19,6 +19,7 @@ import event1Img from "../assets/download.jpg";
 import event2Img from "../assets/image.png";
 import event3Img from "../assets/signup.jpg";
 import "../Styles/dashboard.css";
+import { useAuth } from '../Context/AuthContext';
 
 Chart.register(ArcElement, Tooltip, Legend);
 
@@ -80,6 +81,7 @@ const EVENT_IDEAS = [
 const Dashboard = () => {
   const navigate = useNavigate();
   const userId = localStorage.getItem("userId") || "demoUserId";
+  const { logout } = useAuth();
 
   const [userStats, setUserStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -150,7 +152,7 @@ const Dashboard = () => {
             </li>
           ))}
         </ul>
-        <div className="nav-footer" onClick={() => navigate("/logout")}>
+        <div className="nav-footer" onClick={() => { logout(); window.location.href = "/login"; }}> 
           <FaSignOutAlt className="nav-icon" /> <span className="nav-label">Logout</span>
         </div>
       </nav>

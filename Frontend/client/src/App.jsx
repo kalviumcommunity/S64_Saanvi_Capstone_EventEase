@@ -53,7 +53,7 @@ const AppContent = () => {
         
         {/* Protected Routes */}
         <Route
-          path="/home"
+          path="/Home"
           element={
             <ProtectedRoute>
               <Home />
