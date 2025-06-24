@@ -25,7 +25,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors({
   origin: [
-    'https://eventease-eventmanagment.netlify.app', // Correct Netlify domain
+    'https://eventease-eventmanagemnet.netlify.app', // Correct Netlify domain as provided by user
     'http://localhost:3000',
     'http://localhost:5173',
     process.env.FRONTEND_URL // Optional: from env
