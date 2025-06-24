@@ -43,7 +43,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (user) {
-      fetchUserProfile();
+    fetchUserProfile();
     } else {
       setFormData({
         firstName: '',

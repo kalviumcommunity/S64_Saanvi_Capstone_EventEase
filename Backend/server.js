@@ -25,9 +25,10 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors({
   origin: [
-    'http://localhost:3000', 
+    'https://eventease-eventmanagment.netlify.app', // Correct Netlify domain
+    'http://localhost:3000',
     'http://localhost:5173',
-    process.env.FRONTEND_URL // Add your frontend URL from env
+    process.env.FRONTEND_URL // Optional: from env
   ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -36,12 +37,7 @@ app.use(cors({
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-app.use(
-  cors({
-    origin: 'https://eventease-eventmanagemnet.netlify.app',
-    credentials: true,
-  })
-);
+
 // Upload directory setup with cleanup
 const uploadDir = path.resolve(__dirname, 'uploads');
 const profileUploadDir = path.resolve(uploadDir, 'profiles');
