@@ -36,7 +36,12 @@ app.use(cors({
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
+app.use(
+  cors({
+    origin: 'https://eventease-eventmanagemnet.netlify.app',
+    credentials: true,
+  })
+);
 // Upload directory setup with cleanup
 const uploadDir = path.resolve(__dirname, 'uploads');
 const profileUploadDir = path.resolve(uploadDir, 'profiles');
