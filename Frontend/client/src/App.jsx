@@ -41,9 +41,21 @@ const AppContent = () => {
   // If logged in and not on a public route, show Navbar2
   const showAfterLoginNavbar = user && !publicRoutes.includes(location.pathname.toLowerCase());
 
+  // For debugging - always show Navbar on landing page for now
+  const isLandingPage = location.pathname === '/';
+  
+  // Debug logging
+  console.log('AppContent Debug:', {
+    pathname: location.pathname,
+    user: user,
+    showBeforeLoginNavbar,
+    showAfterLoginNavbar,
+    isLandingPage
+  });
+
   return (
     <>
-      {showBeforeLoginNavbar && <Navbar />}
+      {(showBeforeLoginNavbar || isLandingPage) && <Navbar />}
       {showAfterLoginNavbar && <Navbar2 />}
       <Routes>
         {/* Public Routes */}

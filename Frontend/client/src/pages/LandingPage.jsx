@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import cakeimage from '../assets/image.png';
-import Navbar from '../components/NavBar';
 
 const features = [
   {
@@ -77,8 +76,6 @@ const LandingPage = () => {
 
   return (
     <div style={{ fontFamily: "'Segoe UI', sans-serif", background: '#f4fbe8', color: '#222' }}>
-      {/* Navbar */}
-      <Navbar />
       {/* Hero Section */}
       <section
         style={{
