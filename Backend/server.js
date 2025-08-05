@@ -27,7 +27,7 @@ app.use(cors({
   origin: [
     'https://clinquant-begonia-a9be6f.netlify.app', // Your actual Netlify domain
     'https://snazzy-taffy-c51887.netlify.app', // Additional Netlify domain
-    'http://localhost:3000',
+    'http://localhost:5000',
     'http://localhost:5173',
     process.env.FRONTEND_URL // Optional: from env
   ].filter(Boolean),
