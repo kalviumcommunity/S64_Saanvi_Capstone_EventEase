@@ -1,17 +1,12 @@
 import axios from 'axios';
 
 // Get API URL based on environment
-const getApiUrl = () => {
-  if (import.meta.env.VITE_API_BASE_URL) {
-    return import.meta.env.VITE_API_BASE_URL;
-  }
-  // Default fallback URLs
-  if (import.meta.env.DEV) {
-    return 'http://localhost:5000';
-  }
-  // Production fallback - you should set VITE_API_BASE_URL in your deployment
-  return 'https://eventease-backend.onrender.com';
-};
+// const getApiUrl = () => {
+//   if (import.meta.env.VITE_API_BASE_URL) {
+//     return import.meta.env.VITE_API_BASE_URL;
+//   }
+//   return import.meta.env.DEV ? 'http://localhost:5000' : 'https://your-backend-url.onrender.com';
+// };
 
 // Create axios instance with base configuration
 const api = axios.create({

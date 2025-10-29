@@ -11,7 +11,7 @@ const axios = require("axios");
 dotenv.config();
 
 // Validate required environment variables
-const requiredEnvVars = ['MONGO_URI', 'PORT', 'FOURSQUARE_API_KEY'];
+const requiredEnvVars = ['MONGO_URI', 'PORT', 'JWT_SECRET', 'FOURSQUARE_API_KEY'];
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {
@@ -25,11 +25,12 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors({
   origin: [
-    'https://clinquant-begonia-a9be6f.netlify.app', // Your actual Netlify domain
-    'https://snazzy-taffy-c51887.netlify.app', // Additional Netlify domain
     'http://localhost:3000',
     'http://localhost:5173',
-    process.env.FRONTEND_URL // Optional: from env
+    process.env.FRONTEND_URL,
+    // Add common Netlify patterns for production
+    /^https:\/\/.*\.netlify\.app$/,
+    /^https:\/\/.*\.vercel\.app$/
   ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -266,25 +267,29 @@ app.use((err, req, res, next) => {
 const connectDB = async () => {
   try {
     const mongoURI = process.env.MONGO_URI;
+    console.log("🔌 Attempting to connect to MongoDB...");
+    
     await mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000
+      serverSelectionTimeoutMS: 10000 // Increased timeout for production
     });
     
-    console.log("✅ MongoDB connected");
+    console.log("✅ MongoDB connected successfully");
 
     const User = require('./models/User');
     const userCount = await User.countDocuments();
     console.log(`👥 Users in DB: ${userCount}`);
 
     app.listen(PORT, () => {
-      console.log(`🚀 Server running at http://localhost:${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`📝 API Documentation available at http://localhost:${PORT}/api-docs`);
     });
 
   } catch (err) {
     console.error("❌ DB Connection Error:", err);
+    console.error("❌ Please check your MONGO_URI environment variable");
     process.exit(1);
   }
 };
@@ -303,3 +308,10 @@ process.on('uncaughtException', (err) => {
 
 // Start the server
 connectDB();
+
+// === Serve Frontend ===
+app.use(express.static(path.join(__dirname, "client/dist")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "client/dist", "index.html"));
+});
