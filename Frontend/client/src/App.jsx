@@ -12,7 +12,7 @@ import LandingPage from './pages/LandingPage';
 import Features from './pages/Features';
 import ExampleDashboard from './pages/ExampleDashboard';
 import Vendor from './pages/Vendor';
-import { NotificationProvider } from './context/NotificationContext';
+import { NotificationProvider } from './Context/NotificationContext';
 import Navbar from './components/NavBar';      // Before login
 import Navbar2 from './components/Navbar2';    // After login
 import Dashboard from './pages/Dashboard';

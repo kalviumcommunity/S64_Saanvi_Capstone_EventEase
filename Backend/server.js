@@ -25,7 +25,13 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors({
   origin: [
+<<<<<<< HEAD
     'http://localhost:3000',
+=======
+    'https://clinquant-begonia-a9be6f.netlify.app', // Your actual Netlify domain
+    'https://snazzy-taffy-c51887.netlify.app', // Additional Netlify domain
+    'http://localhost:5000',
+>>>>>>> 07d155fccab82b07afa831ea5823fa450841e912
     'http://localhost:5173',
     process.env.FRONTEND_URL,
     // Add common Netlify patterns for production
